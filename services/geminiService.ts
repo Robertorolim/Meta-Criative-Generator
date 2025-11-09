@@ -50,6 +50,8 @@ const getPrompt = (niche: string, awarenessLevel: AwarenessLevel, creativeType: 
     **Chamada para Ação (CTA) Sugerida:** ${callToAction || 'Clique em "Saiba Mais"'}
     **Tipo de Criativo:** ${creativeType}
 
+    **Instrução Crítica:** TODO o conteúdo gerado (narração, textos, descrições de imagem) DEVE OBRIGATORIAMENTE se basear e incorporar os "Detalhes do Produto/Oferta" fornecidos. Este é o elemento central do criativo. Se os detalhes não forem especificados, use seu conhecimento sobre o nicho.
+
     ${awarenessInstructions}
 
     **Diretrizes Essenciais (Projeto Andrômeda - NÃO IGNORE):**
@@ -84,6 +86,8 @@ const getPrompt = (niche: string, awarenessLevel: AwarenessLevel, creativeType: 
             **Detalhes do Produto/Oferta:** ${productDetails || 'Não especificado.'}
             **Chamada para Ação (CTA) OBRIGÁTORIA:** "${callToAction}"
 
+            **Instrução Crítica:** A descrição da imagem e o texto para a imagem DEVEM OBRIGATORIAMENTE se basear e incorporar os "Detalhes do Produto/Oferta". Este é o elemento central do criativo. Se os detalhes não forem especificados, use seu conhecimento sobre o nicho.
+
             ${awarenessInstructions}
 
             **Diretrizes (NÃO IGNORE):**
@@ -109,6 +113,8 @@ const getPrompt = (niche: string, awarenessLevel: AwarenessLevel, creativeType: 
             **Nível de Consciência do Público:** ${awarenessLevel}
             **Detalhes do Produto/Oferta:** ${productDetails || 'Não especificado.'}
             **Chamada para Ação (CTA) OBRIGÁTORIA:** "${callToAction}" (Inclua a CTA no texto do último slide).
+
+            **Instrução Crítica:** A descrição e o texto de CADA slide DEVEM OBRIGATORIAMENTE se basear e incorporar os "Detalhes do Produto/Oferta". Este é o elemento central do criativo. Se os detalhes não forem especificados, use seu conhecimento sobre o nicho.
 
             ${awarenessInstructions}
 
@@ -141,6 +147,8 @@ const getVariationPrompt = (niche: string, awarenessLevel: AwarenessLevel, creat
       **Detalhes do Produto/Oferta:** ${productDetails || 'Não especificado.'}
       **Chamada para Ação (CTA) Sugerida:** ${callToAction || 'Clique em "Saiba Mais"'}
       **Tipo de Criativo:** ${creativeType}
+
+      **Instrução Crítica:** A nova variação DEVE OBRIGATORIAMENTE continuar se baseando e incorporando os "Detalhes do Produto/Oferta" fornecidos.
 
       ${awarenessInstructions}
 

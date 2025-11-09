@@ -136,6 +136,15 @@ export const CreativeDisplay: React.FC<CreativeDisplayProps> = ({
 
   const renderNarrationContent = (text: string) => {
     const aimeRegex = /(?:\*{0,2})\[([AIME])\]\s*([^:]+):(?:\*{0,2})/gi;
+
+    // Map for the new titles
+    const aimeTitles: { [key: string]: string } = {
+        'A': 'A - Awaken (provocacao inicial)',
+        'I': 'I - Inform (educa sobre o problema)',
+        'M': 'M - Mechanism (mostra o mecanismo)',
+        'E': 'E - Evoke (evoca emoção e CTA leve)',
+    };
+
     const parts = text.split(aimeRegex);
   
     if (parts.length <= 1) {
@@ -156,8 +165,7 @@ export const CreativeDisplay: React.FC<CreativeDisplayProps> = ({
     const renderedParts = [];
 
     for (let i = 1; i < parts.length; i += 3) {
-        const letter = parts[i];
-        const word = parts[i + 1];
+        const letter = parts[i].toUpperCase();
         let textBlock = (parts[i + 2] || '').trim();
 
         const narrationParts = textBlock.split(visualCueRegex).filter(part => part);
@@ -168,7 +176,7 @@ export const CreativeDisplay: React.FC<CreativeDisplayProps> = ({
               <div className="absolute left-[-9px] top-1 h-5 w-5 bg-gray-950 flex items-center justify-center">
                 <div className="h-2 w-2 rounded-full bg-sky-400"></div>
               </div>
-              <h4 className="font-semibold text-sky-400 mb-1">{`[${letter}] ${word}`}</h4>
+              <h4 className="font-semibold text-sky-400 mb-1">{aimeTitles[letter as keyof typeof aimeTitles]}</h4>
               <p className="text-gray-300 leading-relaxed">
                   {narrationParts.map((part, j) => {
                       if (part.startsWith('(') && part.endsWith(')')) {
