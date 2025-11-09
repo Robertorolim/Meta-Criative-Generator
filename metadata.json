@@ -1,0 +1,5 @@
+{
+  "name": "Meta Creative Generator (Andromeda Compliant)",
+  "description": "An application to generate creative ad copy and images for Meta Ads, following the 'Projeto Andrômeda' guidelines. Users can select their niche and creative type (UGC, VSL, Image, Carousel) to get tailored content, including AI-generated images with text overlays for visual ads.",
+  "requestFramePermissions": []
+}
