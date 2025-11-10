@@ -2,18 +2,21 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { CreativeGeneratorForm } from './components/CreativeGeneratorForm';
 import { CreativeDisplay } from './components/CreativeDisplay';
 import { Header } from './components/Header';
-// Fix: Import VoiceOption to correctly type the styleHint parameter.
-import { CreativeType, ImageSize, GeneratedContent, VoiceStyle, VoiceOption, AwarenessLevel } from './types';
+import { CreativeType, ImageSize, GeneratedContent, VoiceStyle, VoiceOption, AwarenessLevel, LanguageType } from './types';
 import { generateCreative, generateAudio, generateCreativeVariation } from './services/geminiService';
-import { NICHE_OPTIONS, CTA_OPTIONS, AWARENESS_LEVEL_OPTIONS } from './constants';
+import { NICHE_OPTIONS, HOOK_OPTIONS_BY_AWARENESS, AWARENESS_LEVEL_OPTIONS, LANGUAGE_TYPE_OPTIONS } from './constants';
 
 const App: React.FC = () => {
   const [selectedNiche, setSelectedNiche] = useState<string>(NICHE_OPTIONS[0]);
   const [customNiche, setCustomNiche] = useState<string>('');
   const [awarenessLevel, setAwarenessLevel] = useState<AwarenessLevel>(AWARENESS_LEVEL_OPTIONS[0].value);
+  const [languageType, setLanguageType] = useState<LanguageType>(LANGUAGE_TYPE_OPTIONS[0].value);
   const [productDetails, setProductDetails] = useState<string>('');
-  const [callToAction, setCallToAction] = useState<string>(CTA_OPTIONS[0]);
-  const [creativeType, setCreativeType] = useState<CreativeType>(CreativeType.UGC_VIDEO);
+  
+  const initialHook = HOOK_OPTIONS_BY_AWARENESS[awarenessLevel]?.[0]?.value || '';
+  const [selectedHook, setSelectedHook] = useState<string>(initialHook);
+  
+  const [creativeType, setCreativeType] = useState<CreativeType>(CreativeType.VIDEO_UGC);
   const [imageSize, setImageSize] = useState<ImageSize>('1:1');
   const [carouselSlidesCount, setCarouselSlidesCount] = useState<number>(3);
   const [productImageFile, setProductImageFile] = useState<File | null>(null);
@@ -97,9 +100,10 @@ const App: React.FC = () => {
         awarenessLevel,
         creativeType, 
         productDetails, 
-        callToAction, 
+        selectedHook,
+        languageType,
         imageSize,
-        creativeType === CreativeType.CAROUSEL ? carouselSlidesCount : 1,
+        creativeType === CreativeType.CARROSSEL ? carouselSlidesCount : 1,
         productImageBase64,
         productImageMimeType
       );
@@ -110,7 +114,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedNiche, customNiche, productDetails, callToAction, creativeType, imageSize, carouselSlidesCount, productImageFile, awarenessLevel]);
+  }, [selectedNiche, customNiche, productDetails, selectedHook, creativeType, imageSize, carouselSlidesCount, productImageFile, awarenessLevel, languageType]);
 
   const handleGenerateVariation = useCallback(async (originalText: string) => {
     const niche = selectedNiche === 'Outro' ? customNiche : selectedNiche;
@@ -119,7 +123,7 @@ const App: React.FC = () => {
     setAudioUrl(null); // Clear previous audio
     setAudioError(null);
     try {
-      const newText = await generateCreativeVariation(niche, awarenessLevel, creativeType, productDetails, callToAction, imageSize, originalText);
+      const newText = await generateCreativeVariation(niche, awarenessLevel, creativeType, productDetails, selectedHook, languageType, imageSize, originalText);
       setGeneratedContent(prevContent => ({
         ...prevContent!,
         text: newText,
@@ -130,9 +134,8 @@ const App: React.FC = () => {
     } finally {
       setIsVariationLoading(false);
     }
-  }, [selectedNiche, customNiche, productDetails, callToAction, creativeType, imageSize, awarenessLevel]);
+  }, [selectedNiche, customNiche, productDetails, selectedHook, creativeType, imageSize, awarenessLevel, languageType]);
 
-  // Fix: Correctly type the styleHint parameter to match the expected type in generateAudio.
   const handleGenerateAudio = useCallback(async (text: string, voiceName: string, voiceStyle: VoiceStyle, styleHint?: VoiceOption['styleHint']) => {
     setIsAudioLoading(true);
     setAudioError(null);
@@ -160,10 +163,12 @@ const App: React.FC = () => {
             setCustomNiche={setCustomNiche}
             awarenessLevel={awarenessLevel}
             setAwarenessLevel={setAwarenessLevel}
+            languageType={languageType}
+            setLanguageType={setLanguageType}
             productDetails={productDetails}
             setProductDetails={setProductDetails}
-            callToAction={callToAction}
-            setCallToAction={setCallToAction}
+            selectedHook={selectedHook}
+            setSelectedHook={setSelectedHook}
             creativeType={creativeType}
             setCreativeType={setCreativeType}
             imageSize={imageSize}

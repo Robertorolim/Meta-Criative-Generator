@@ -21,7 +21,7 @@ interface CreativeDisplayProps {
 }
 
 const SkeletonLoader: React.FC<{ creativeType: CreativeType }> = ({ creativeType }) => {
-    const isImageType = [CreativeType.IMAGE_FEED, CreativeType.IMAGE_STORIES, CreativeType.CAROUSEL].includes(creativeType);
+    const isImageType = [CreativeType.IMAGEM_UNICA, CreativeType.CARROSSEL].includes(creativeType);
 
     if (isImageType) {
         return (
@@ -105,18 +105,17 @@ export const CreativeDisplay: React.FC<CreativeDisplayProps> = ({
   isVariationLoading,
 }) => {
   const [copied, setCopied] = useState(false);
-  const isNarrationType = creativeType === CreativeType.UGC_VIDEO || creativeType === CreativeType.MINI_VSL;
+  const isNarrationType = [CreativeType.VIDEO_UGC, CreativeType.MINI_VSL].includes(creativeType);
   const copyButtonText = isNarrationType ? 'Copiar Narração' : 'Copiar Texto';
   
   const handleCopy = () => {
     if (content?.text) {
         let textToCopy = content.text;
         if (isNarrationType) {
-            const aimeRegex = /(?:\*{0,2})\[[AIME]\][^:]*:(?:\*{0,2})/gi;
-            textToCopy = textToCopy.replace(aimeRegex, "");
-            const visualCueRegex = /\([^)]*\)/g;
-            textToCopy = textToCopy.replace(visualCueRegex, "");
-            textToCopy = textToCopy.trim().replace(/\n{2,}/g, '\n');
+            // Clean visual cues and AIME tags for easier pasting
+            textToCopy = textToCopy.replace(/\([^)]*\)/g, "");
+            textToCopy = textToCopy.replace(/\[[A-Z]\]/g, '');
+            textToCopy = textToCopy.trim().replace(/\s+/g, ' ');
         }
         navigator.clipboard.writeText(textToCopy);
         setCopied(true);
@@ -135,61 +134,74 @@ export const CreativeDisplay: React.FC<CreativeDisplayProps> = ({
   }, [content]);
 
   const renderNarrationContent = (text: string) => {
-    const aimeRegex = /(?:\*{0,2})\[([AIME])\]\s*([^:]+):(?:\*{0,2})/gi;
-
-    // Map for the new titles
-    const aimeTitles: { [key: string]: string } = {
-        'A': 'A - Awaken (provocacao inicial)',
-        'I': 'I - Inform (educa sobre o problema)',
-        'M': 'M - Mechanism (mostra o mecanismo)',
-        'E': 'E - Evoke (evoca emoção e CTA leve)',
+    const AIME_LABELS: Record<string, { label: string; description: string; color: string; bgColor: string; borderColor: string; }> = {
+      '[A]': { label: 'A', description: 'Awaken', color: 'text-pink-300', bgColor: 'bg-pink-900/50', borderColor: 'border-pink-500/50' },
+      '[I]': { label: 'I', description: 'Inform', color: 'text-cyan-300', bgColor: 'bg-cyan-900/50', borderColor: 'border-cyan-500/50' },
+      '[M]': { label: 'M', description: 'Mechanism', color: 'text-green-300', bgColor: 'bg-green-900/50', borderColor: 'border-green-500/50' },
+      '[E]': { label: 'E', description: 'Evoke', color: 'text-purple-300', bgColor: 'bg-purple-900/50', borderColor: 'border-purple-500/50' },
     };
 
-    const parts = text.split(aimeRegex);
-  
-    if (parts.length <= 1) {
-      const visualCueRegex = /(\([^)]+\))/g;
-      return (
-        <p className="whitespace-pre-wrap text-gray-300 text-base leading-relaxed">
-          {text.split(visualCueRegex).filter(part => part).map((part, index) => {
-            if (part.startsWith('(') && part.endsWith(')')) {
-              return <span key={index} className="text-gray-400 italic">{part}</span>;
-            }
-            return <span key={index}>{part}</span>;
-          })}
-        </p>
-      );
-    }
-
     const visualCueRegex = /(\([^)]+\))/g;
-    const renderedParts = [];
+    const aimeTagRegex = /(\[[AIME]\])/g;
+    const parts = text.split(aimeTagRegex).filter(part => part && part.trim() !== '');
 
-    for (let i = 1; i < parts.length; i += 3) {
-        const letter = parts[i].toUpperCase();
-        let textBlock = (parts[i + 2] || '').trim();
-
-        const narrationParts = textBlock.split(visualCueRegex).filter(part => part);
-
-        renderedParts.push(
-            <div key={i} className="relative pl-8">
-              <div className="absolute left-0 top-1 h-full w-px bg-sky-500/30"></div>
-              <div className="absolute left-[-9px] top-1 h-5 w-5 bg-gray-950 flex items-center justify-center">
-                <div className="h-2 w-2 rounded-full bg-sky-400"></div>
-              </div>
-              <h4 className="font-semibold text-sky-400 mb-1">{aimeTitles[letter as keyof typeof aimeTitles]}</h4>
-              <p className="text-gray-300 leading-relaxed">
-                  {narrationParts.map((part, j) => {
-                      if (part.startsWith('(') && part.endsWith(')')) {
-                          return <span key={j} className="text-gray-400 italic">{part}</span>;
-                      }
-                      return <span key={j}>{part}</span>;
-                  })}
-              </p>
+    // Fallback for when AIME tags are not present in the response
+    if (parts.length <= 1 || !parts.some(p => p.match(/^\[[AIME]\]$/))) {
+        return (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-sky-300 mb-2">Roteiro (Narração e Visuais)</h3>
+            <div className="whitespace-pre-wrap text-gray-300 text-base leading-relaxed bg-white/5 p-4 rounded-lg">
+              {text.split(visualCueRegex).filter(part => part).map((part, index) => {
+                if (part.startsWith('(') && part.endsWith(')')) {
+                  return <span key={index} className="text-amber-400 italic">{part}</span>;
+                }
+                return <span key={index}>{part}</span>;
+              })}
             </div>
+          </div>
         );
     }
+    
+    const structuredSections: { aimeTag: string; content: string }[] = [];
+    for (let i = 0; i < parts.length; i++) {
+        if (parts[i].match(/^\[[AIME]\]$/) && parts[i+1]) {
+            structuredSections.push({ aimeTag: parts[i], content: parts[i + 1] });
+            i++; // Skip the content part
+        }
+    }
+    
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-sky-300 mb-2">Roteiro Estruturado (A.I.M.E.)</h3>
+        <div className="space-y-6">
+          {structuredSections.map((section, index) => {
+              const aimeInfo = AIME_LABELS[section.aimeTag];
+              if (!aimeInfo) return null;
 
-    return <div className="space-y-6">{renderedParts}</div>;
+              return (
+                <div key={index} className={`p-4 rounded-lg border ${aimeInfo.borderColor} ${aimeInfo.bgColor}`}>
+                    <div className={`flex items-center gap-3 mb-3`}>
+                        <span className={`flex-shrink-0 font-bold text-lg h-8 w-8 rounded-full flex items-center justify-center ${aimeInfo.color} bg-white/5 border-2 ${aimeInfo.borderColor}`}>
+                            {aimeInfo.label}
+                        </span>
+                        <span className={`font-bold text-lg ${aimeInfo.color}`}>
+                            {aimeInfo.description}
+                        </span>
+                    </div>
+                    <div className="whitespace-pre-wrap text-gray-300 text-base leading-relaxed pl-1">
+                      {section.content.split(visualCueRegex).filter(part => part).map((part, partIndex) => {
+                          if (part.startsWith('(') && part.endsWith(')')) {
+                            return <span key={partIndex} className="text-amber-400 italic">{part}</span>;
+                          }
+                          return <span key={partIndex}>{part.trim()} </span>;
+                      })}
+                    </div>
+                </div>
+              )
+          })}
+        </div>
+      </div>
+    );
   };
 
 
@@ -244,16 +256,16 @@ export const CreativeDisplay: React.FC<CreativeDisplayProps> = ({
                 <div className="pt-6 border-t border-white/10">
                     <button
                         onClick={() => onGenerateVariation(content.text!)}
-                        disabled={isVariationLoading || creativeType === CreativeType.CAROUSEL}
+                        disabled={isVariationLoading || creativeType === CreativeType.CARROSSEL}
                         className="w-full flex items-center justify-center gap-2 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 font-bold py-2.5 px-4 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-indigo-500/40"
-                        title={creativeType === CreativeType.CAROUSEL ? "Variações não disponíveis para carrossel" : ""}
+                        title={creativeType === CreativeType.CARROSSEL ? "Variações não disponíveis para carrossel" : ""}
                     >
                         {isVariationLoading ? (
                             <>
                                 <svg className="animate-spin -ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 Criando Variação...
                             </>
-                        ) : `Gerar Variação ${isNarrationType ? 'da Narração' : 'do Texto'}`}
+                        ) : `Gerar Variação ${isNarrationType ? 'do Roteiro' : 'do Texto'}`}
                     </button>
                 </div>
             )}

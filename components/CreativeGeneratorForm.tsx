@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { CreativeType, ImageSize, AwarenessLevel } from '../types';
-import { CREATIVE_TYPE_OPTIONS, NICHE_OPTIONS, CTA_OPTIONS, IMAGE_SIZE_OPTIONS, AWARENESS_LEVEL_OPTIONS } from '../constants';
+import { CreativeType, ImageSize, AwarenessLevel, LanguageType } from '../types';
+import { CREATIVE_TYPE_OPTIONS, NICHE_OPTIONS, HOOK_OPTIONS_BY_AWARENESS, IMAGE_SIZE_OPTIONS, AWARENESS_LEVEL_OPTIONS, LANGUAGE_TYPE_OPTIONS } from '../constants';
 import { SparklesIcon } from './icons/SparklesIcon';
 
 interface CreativeGeneratorFormProps {
@@ -10,10 +10,12 @@ interface CreativeGeneratorFormProps {
   setCustomNiche: (niche: string) => void;
   awarenessLevel: AwarenessLevel;
   setAwarenessLevel: (level: AwarenessLevel) => void;
+  languageType: LanguageType;
+  setLanguageType: (type: LanguageType) => void;
   productDetails: string;
   setProductDetails: (details: string) => void;
-  callToAction: string;
-  setCallToAction: (cta: string) => void;
+  selectedHook: string;
+  setSelectedHook: (hook: string) => void;
   creativeType: CreativeType;
   setCreativeType: (type: CreativeType) => void;
   imageSize: ImageSize;
@@ -47,10 +49,12 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
   setCustomNiche,
   awarenessLevel,
   setAwarenessLevel,
+  languageType,
+  setLanguageType,
   productDetails,
   setProductDetails,
-  callToAction,
-  setCallToAction,
+  selectedHook,
+  setSelectedHook,
   creativeType,
   setCreativeType,
   imageSize,
@@ -72,9 +76,21 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
     onGenerate();
   };
   
-  const isImageType = [CreativeType.IMAGE_FEED, CreativeType.IMAGE_STORIES, CreativeType.CAROUSEL].includes(creativeType);
+  const isImageType = [CreativeType.IMAGEM_UNICA, CreativeType.CARROSSEL].includes(creativeType);
   const sizeOptions = IMAGE_SIZE_OPTIONS[creativeType] || [];
   const selectedAwarenessDescription = AWARENESS_LEVEL_OPTIONS.find(opt => opt.value === awarenessLevel)?.description;
+  const selectedLanguageDescription = LANGUAGE_TYPE_OPTIONS.find(opt => opt.value === languageType)?.description;
+  
+  const availableHooks = HOOK_OPTIONS_BY_AWARENESS[awarenessLevel] || [];
+
+  useEffect(() => {
+    // When awareness level changes, update the selected hook to the first available one for the new level.
+    const newHooks = HOOK_OPTIONS_BY_AWARENESS[awarenessLevel] || [];
+    if (newHooks.length > 0 && newHooks[0].value !== selectedHook) {
+        setSelectedHook(newHooks[0].value);
+    }
+  }, [awarenessLevel, setSelectedHook, selectedHook]);
+
 
   useEffect(() => {
     if (isImageType && sizeOptions.length > 0 && !sizeOptions.find(opt => opt.value === imageSize)) {
@@ -156,13 +172,32 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
             </select>
             {selectedAwarenessDescription && (
                 <div className="mt-2 text-xs text-gray-400 bg-white/5 p-3 rounded-md border border-white/10">
-                    <p className="font-bold text-sky-400 mb-1">Abordagem:</p>
                     <p>{selectedAwarenessDescription}</p>
                 </div>
             )}
         </FormSection>
 
-        <FormSection number={3} title="Detalhes do Produto/Oferta">
+        <FormSection number={3} title="Tipo de Linguagem">
+            <select
+                id="languageType"
+                value={languageType}
+                onChange={(e) => setLanguageType(e.target.value as LanguageType)}
+                className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
+            >
+                {LANGUAGE_TYPE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value} className="bg-gray-800">
+                        {option.label}
+                    </option>
+                ))}
+            </select>
+            {selectedLanguageDescription && (
+                <div className="mt-2 text-xs text-gray-400 bg-white/5 p-3 rounded-md border border-white/10">
+                    <p>{selectedLanguageDescription}</p>
+                </div>
+            )}
+        </FormSection>
+
+        <FormSection number={4} title="Detalhes do Produto/Oferta">
             <textarea
                 id="productDetails"
                 value={productDetails}
@@ -191,22 +226,22 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
             )}
         </FormSection>
         
-        <FormSection number={4} title="Chamada para Ação (CTA)">
+        <FormSection number={5} title="Estrutura do Criativo / Gancho">
           <select
-            id="callToAction"
-            value={callToAction}
-            onChange={(e) => setCallToAction(e.target.value)}
+            id="hook"
+            value={selectedHook}
+            onChange={(e) => setSelectedHook(e.target.value)}
             className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
           >
-            {CTA_OPTIONS.map((cta) => (
-              <option key={cta} value={cta} className="bg-gray-800">
-                {cta}
+            {availableHooks.map((hook) => (
+              <option key={hook.value} value={hook.value} className="bg-gray-800">
+                {hook.label}
               </option>
             ))}
           </select>
         </FormSection>
         
-        <FormSection number={5} title="Formato do Criativo">
+        <FormSection number={6} title="Formato do Criativo">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <select
                 id="creativeType"
@@ -234,7 +269,7 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
                         ))}
                     </select>
             )}
-            {creativeType === CreativeType.CAROUSEL && (
+            {creativeType === CreativeType.CARROSSEL && (
                  <div className="sm:col-span-2">
                      <label htmlFor="carouselSlides" className="block text-sm font-medium text-gray-300 mb-2">Nº de Slides do Carrossel</label>
                      <input

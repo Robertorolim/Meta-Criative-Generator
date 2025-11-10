@@ -1,133 +1,234 @@
 import { GoogleGenAI, Modality, Type } from "@google/genai";
-import { CreativeType, ImageSize, GeneratedContent, VoiceStyle, VoiceOption, CarouselSlide, AwarenessLevel } from '../types';
+import { CreativeType, ImageSize, GeneratedContent, VoiceStyle, VoiceOption, CarouselSlide, AwarenessLevel, LanguageType } from '../types';
 
 const getAwarenessLevelInstructions = (awarenessLevel: AwarenessLevel): string => {
     switch (awarenessLevel) {
         case AwarenessLevel.UNCONSCIOUS:
             return `
-**Diretriz de Nível de Consciência (Inconsciente):**
-- **Objetivo:** Despertar a pessoa para um problema que ela não sabia que tinha.
-- **Abordagem:** NÃO fale do produto ou da solução. Use storytelling, ganchos de curiosidade, notícias chocantes ou controvérsias. O foco total é no DESPERTAR DO PROBLEMA. O criativo deve gerar um "clique" na mente da pessoa, fazendo-a perceber uma nova dor ou um problema oculto.
+**Diretriz de Nível de Consciência (Nível 1 — Inconsciente):**
+- **Objetivo:** Despertar a consciência do problema sem vender.
+- **Tom:** Intrigante, provocativo, misterioso.
+- **Estruturas de Gancho (Hooks):**
+    - **Padrão de Interrupção:** “Você se lembra de quem você era antes de [situação atual]?” (Ex: “Você se lembra de quem você era antes de desistir do seu corpo?”). Funciona para transformação pessoal, emagrecimento, carreira.
+    - **Estatística Chocante:** “[X]% das pessoas fazem [ação] sem saber que isso causa [consequência oculta]” (Ex: “87% das pessoas tomam café ao acordar sem saber que isso trava o metabolismo por 6h”). Funciona para saúde, finanças.
+    - **Revelação Silenciosa:** “Existe algo que ninguém te conta sobre [área]...” (Ex: “Existe algo que ninguém te conta sobre ganhar dinheiro online...”).
+    - **Comparação Temporal:** “[Área] era assim há 5 anos. Hoje é diferente. E você ainda está preso no passado.” (Ex: “Tráfego pago era assim há 5 anos...”).
+    - **Pergunta Existencial:** “Se você pudesse voltar [X anos], o que mudaria?” (Ex: “Se você pudesse voltar 10 anos, o que mudaria no seu corpo?”).
+    - **Observação Social:** “Repare nas pessoas ao seu redor. O que elas têm em comum?” (Ex: “Quantas estão realmente felizes com o próprio corpo?”).
+    - **Inversão de Realidade:** “E se eu te dissesse que [crena comum] é o oposto do que você deveria fazer?” (Ex: “Comer menos pode ser o oposto do ideal pra emagrecer.”).
 `;
         case AwarenessLevel.PROBLEM_AWARE:
             return `
-**Diretriz de Nível de Consciência (Consciente do Problema):**
-- **Objetivo:** Agitar o problema que a pessoa já sabe que tem.
-- **Abordagem:** Demonstre profunda empatia pela dor do cliente. Aprofunde o problema, mostrando as consequências negativas de não resolvê-lo. Explique o "porquê" do problema existir, talvez introduzindo um inimigo oculto ou uma causa que a pessoa desconhecia.
+**Diretriz de Nível de Consciência (Nível 2 — Consciente do Problema):**
+- **Objetivo:** Educar sobre a solução e desconstruir crenças antigas.
+- **Tom:** Educativo, revelador, consultivo.
+- **Estruturas de Gancho (Hooks):**
+    - **Causa Oculta:** “A verdadeira causa de [problema] não é [crença]. É [causa real].” (Ex: “Não é falta de força de vontade; é resistência à leptina.”).
+    - **Desconstrução:** “Por que [solução antiga] não funciona mais (e o que fazer agora)” (Ex: “Por que low-carb não funciona mais...”).
+    - **Ciclo Vicioso:** “Você tenta [ação], piora [problema]... o ciclo nunca acaba.” (Ex: “Dieta → desacelera metabolismo → tenta de novo → piora.”).
+    - **Revelação Progressiva:** “3 sinais de que [problema] está piorando (sem você perceber)” (Ex: “3 sinais de metabolismo travado.”).
+    - **Erro Comum:** “O erro que 90% comete ao tentar [resolver problema] (e como evitar)” (Ex: “O erro que 90% comete ao emagrecer.”).
+    - **Teste de Auto-Diagnóstico:** “Faça este teste: você tem [problema]?” (Ex: “Resistência à insulina?”).
+    - **Linha do Tempo:** “Semana 1: [sintoma]… Mês 6: [colapso]. Reconhece?” (Ex: cansaço → insônia → burnout).
 `;
         case AwarenessLevel.SOLUTION_AWARE:
             return `
-**Diretriz de Nível de Consciência (Consciente da Solução):**
-- **Objetivo:** Posicionar seu produto/método como a melhor solução possível.
-- **Abordagem:** Apresente sua solução como uma oportunidade única ou um mecanismo novo e inovador. Mostre COMO ela resolve o problema de forma diferente e mais eficaz que as outras alternativas que a pessoa já conhece. Destaque o diferencial.
+**Diretriz de Nível de Consciência (Nível 3 — Consciente da Solução):**
+- **Objetivo:** Provar diferenciação e quebrar objeções.
+- **Tom:** Confiante, factual, evidencial.
+- **Estruturas de Gancho (Hooks):**
+    - **Diferenciação Direta:** “A diferença entre [genérico] e [sua solução]: [diferencial]” (Ex: “Dieta comum × protocolo metabólico.”).
+    - **Prova Social Numérica:** “[Nome] conseguiu [resultado] em [tempo]. Veja como.” (Ex: “Maria perdeu 14kg em 8 semanas...”).
+    - **Objeção Antecipada:** “‘Mas [objeção]’ — é por isso que funciona.” (Ex: “Sem tempo pra academia.”).
+    - **Comparação Lado a Lado:** “[Método A] vs [seu método]. A escolha é sua.” (Ex: restritiva × protocolo metabólico).
+    - **Antes e Depois Emocional:** “Antes: [emoção ruim]. Depois: [emoção boa]. O que mudou?” (Ex: “Vergonha do biquíni” → “primeira a entrar no mar.”).
+    - **Autoridade por Associação:** “Mesmo método usado por [autoridade]” (Ex: “Protocolo de atletas olímpicos (adaptado).”).
+    - **Garantia Inversa:** “Se você não conseguir [resultado] em [prazo], eu [compromisso].” (Ex: “Devolvo em dobro.”).
 `;
         case AwarenessLevel.PRODUCT_AWARE:
             return `
-**Diretriz de Nível de Consciência (Consciente do Produto):**
-- **Objetivo:** Convencer a pessoa de que seu produto é a escolha certa para ela.
-- **Abordagem:** A pessoa já conhece seu produto, mas ainda não comprou. Quebre objeções comuns, use forte prova social (depoimentos, números), crie um senso de urgência ou escassez e reforce os benefícios e a transformação.
+**Diretriz de Nível de Consciência (Nível 4 — Consciente do Produto):**
+- **Objetivo:** Criar urgência, facilitar decisão e remover último atrito.
+- **Tom:** Direto, urgente, facilitador.
+- **Estruturas de Gancho (Hooks):**
+    - **Escassez Real:** “[Número] vagas restantes. Depois, só em [data].”
+    - **Facilitação Extrema:** “3 cliques. 2 minutos. Você começa hoje.”
+    - **Custo de Oportunidade:** “Cada dia que você adia = [perda concreta].”
+    - **Bônus com Prazo:** “Entre hoje e ganhe [bônus]. Amanhã volta ao normal.”
+    - **Próximo Passo Óbvio:** “Você já sabe que precisa. Agora é só [ação simples].”
+    - **Comparação de Investimento:** “[Preço] ÷ [tempo] = menos que [comparação diária].” (Ex: “R$297 ÷ 90 dias = R$3,30/dia (menos que um café).”).
+    - **Deadline Emocional:** “Daqui a [prazo], você estará [estado futuro]. Onde?” (Ex: “Daqui a 3 meses é verão…”).
 `;
-        case AwarenessLevel.MOST_AWARE:
+        case AwarenessLevel.ULTRA_AWARE:
             return `
-**Diretriz de Nível de Consciência (Consciente Total):**
-- **Objetivo:** Fechar a venda agora.
-- **Abordagem:** A pessoa já confia no seu produto e está pronta para comprar, só esperando a oferta certa. Faça uma oferta direta, clara e irresistível. Use descontos, bônus, frete grátis, etc. O criativo deve ser direto ao ponto, focado na oferta.
+**Diretriz de Nível de Consciência (Nível 5 — Ultra Consciente):**
+- **Objetivo:** Conversão imediata e remoção total de atrito.
+- **Tom:** Ultra direto, transacional.
+- **Estruturas de Gancho (Hooks):**
+    - **Acesso Imediato:** “Clique. Pague. Comece agora.”
+    - **Demonstração em Tempo Real:** “Veja funcionando em 60s [DEMO AO VIVO]”
+    - **Chamada Direta:** “Link na bio. Clique agora.”
+    - **Resultado Garantido:** “Comece hoje. Resultado em [prazo]. Ou dinheiro de volta.”
 `;
         default:
             return '';
     }
 };
 
+const getLanguageTypeInstructions = (languageType: LanguageType): string => {
+    switch (languageType) {
+        case LanguageType.SENSORIAL:
+            return `**Estilo de Linguagem: Sensorial (Imersiva)**
+- **Objetivo:** Fazer o público SENTIR antes de entender.
+- **Como usar:** Use palavras que evocam os 5 sentidos: cheiro, calor, peso, som, toque, contraste. Crie uma cena vívida na mente do leitor.
+- **Exemplo:** "Você acorda cansado, o despertador grita, e parece que o corpo pesa o dobro. Mas não é preguiça — é sinal de algo mais profundo."`;
+        case LanguageType.IDENTIFICATION:
+            return `**Estilo de Linguagem: Identificação (Espelho)**
+- **Objetivo:** Fazer o leitor pensar "esse sou eu!".
+- **Como usar:** Use as palavras e sentimentos exatos do seu público. Reflita as frustrações deles. Use frases como "Se você sente que...", "Bem-vindo ao clube dos que...".
+- **Exemplo:** "Se você sente que trabalha o dia todo e ainda assim o resultado nunca vem... bem-vindo ao clube dos que carregam o peso do mundo e recebem migalhas de retorno."`;
+        case LanguageType.MECHANISM:
+            return `**Estilo de Linguagem: Mecanismo (Autoridade + Revelação)**
+- **Objetivo:** Explicar de forma lógica por que nada funcionou antes e por que sua solução vai funcionar.
+- **Como usar:** Dê um nome ao problema ou à solução. Use palavras como: mecanismo, gatilho, processo, sistema, estrutura, fórmula. Apresente um "vilão" claro.
+- **Exemplo:** "O problema nunca foi sua disciplina — foi o ciclo de cortisol desregulado. E é exatamente isso que o método [nome] ajusta de forma natural."`;
+        case LanguageType.CONTRAST:
+            return `**Estilo de Linguagem: Contraste (Choque Controlado)**
+- **Objetivo:** Quebrar um padrão mental e despertar curiosidade.
+- **Como usar:** Apresente uma crença comum e depois a inverta. Use a estrutura "Você acha que X... mas na verdade é Y." ou "O maior erro não é X... é Y.".
+- **Exemplo:** "O erro mais caro que você comete todos os dias não custa dinheiro — custa energia mental."`;
+        case LanguageType.REVELATION:
+            return `**Estilo de Linguagem: Revelação (Confidencial)**
+- **Objetivo:** Soar como um insider, não como um vendedor.
+- **Como usar:** Adote um tom de "deixa eu te contar um segredo". Use frases como "O que ninguém te conta é...", "O segredo dos bastidores é...".
+- **Exemplo:** "Ninguém comenta isso, mas os profissionais que mais crescem fazem uma coisa em comum — e não tem nada a ver com sorte."`;
+        case LanguageType.STATUS:
+            return `**Estilo de Linguagem: Status (Transformacional)**
+- **Objetivo:** Focar na transformação de identidade e no "novo eu" que o produto entrega.
+- **Como usar:** Fale sobre sentimentos de poder, confiança, liberdade, reconhecimento e pertencimento. Vá além do benefício funcional.
+- **Exemplo:** "Não é sobre perder peso. É sobre entrar em qualquer sala e sentir que todos percebem sua presença."`;
+        case LanguageType.DECISION:
+            return `**Estilo de Linguagem: Decisão (Direta e Rápida)**
+- **Objetivo:** Dar o empurrão final para a ação, sem ruído.
+- **Como usar:** Seja direto, claro e imperativo. Remova adjetivos desnecessários. Foque no próximo passo simples.
+- **Exemplo:** "Clique e veja por dentro. Você vai entender em 20 segundos por que todos estão falando disso."`;
+        default:
+            return '';
+    }
+};
 
-const getPrompt = (niche: string, awarenessLevel: AwarenessLevel, creativeType: CreativeType, productDetails: string, callToAction: string, imageSize: ImageSize, carouselSlidesCount: number): string => {
+const getCTAInstructions = (awarenessLevel: AwarenessLevel): string => {
+    switch (awarenessLevel) {
+        case AwarenessLevel.UNCONSCIOUS:
+            return "Termine com uma chamada para ação (CTA) extremamente leve e indireta, focada em engajamento e não em venda. Use variações. Exemplos: 'Me siga para descobrir mais sobre isso', 'Comente o que você acha', 'Toque aqui se isso fez sentido para você'.";
+        case AwarenessLevel.PROBLEM_AWARE:
+            return "Termine com uma CTA focada em aprofundar o conhecimento sobre o problema ou a categoria da solução. Use variações. Exemplos: 'Toque para descobrir os 3 erros mais comuns', 'Comente EU QUERO para receber um diagnóstico rápido', 'Siga para entender a verdadeira causa do problema'.";
+        case AwarenessLevel.SOLUTION_AWARE:
+            return "Termine com uma CTA que direcione para a prova ou diferenciação da sua solução. Use variações. Exemplos: 'Veja o passo a passo no link da bio', 'Toque para ver o estudo de caso completo', 'Acesse o link para comparar os métodos'.";
+        case AwarenessLevel.PRODUCT_AWARE:
+            return "Termine com uma CTA clara e direta, focada em facilitar a decisão e criar urgência. Use variações. Exemplos: 'Toque no link da bio para garantir sua vaga', 'Comece hoje clicando no link abaixo', 'Acesse o site para ver os bônus disponíveis só hoje'.";
+        case AwarenessLevel.ULTRA_AWARE:
+            return "Termine com uma CTA ultra direta e transacional, removendo qualquer atrito. Use variações. Exemplos: 'Clique no link da bio para comprar agora', 'Toque aqui para acesso imediato', 'Últimas unidades no link da bio'.";
+        default:
+            return "Termine com uma chamada para ação leve e apropriada para o nível de consciência.";
+    }
+};
+
+
+const getPrompt = (niche: string, awarenessLevel: AwarenessLevel, creativeType: CreativeType, productDetails: string, hook: string, languageType: LanguageType, imageSize: ImageSize, carouselSlidesCount: number): string => {
   const awarenessInstructions = getAwarenessLevelInstructions(awarenessLevel);
+  const languageInstructions = getLanguageTypeInstructions(languageType);
+  const ctaInstructions = getCTAInstructions(awarenessLevel);
   const basePrompt = `
-    Você é um especialista em copywriting e direção de arte para Meta Ads, treinado nas mais recentes diretrizes do "Projeto Andrômeda". Sua tarefa é criar todos os componentes para um criativo de anúncio.
+    Você é um copywriter de elite e diretor de arte para Meta Ads, especialista no framework "Projeto Andrômeda". Sua missão é criar um criativo de anúncio perfeitamente calibrado para o público.
 
     **Nicho do Cliente:** ${niche}
     **Nível de Consciência do Público:** ${awarenessLevel}
+    **Tipo de Linguagem:** ${languageType}
+    **Estrutura de Gancho (Hook) Selecionada:** "${hook}"
     **Detalhes do Produto/Oferta:** ${productDetails || 'Não especificado.'}
-    **Chamada para Ação (CTA) Sugerida:** ${callToAction || 'Clique em "Saiba Mais"'}
     **Tipo de Criativo:** ${creativeType}
 
-    **Instrução Crítica:** TODO o conteúdo gerado (narração, textos, descrições de imagem) DEVE OBRIGATORIAMENTE se basear e incorporar os "Detalhes do Produto/Oferta" fornecidos. Este é o elemento central do criativo. Se os detalhes não forem especificados, use seu conhecimento sobre o nicho.
+    **Diretriz Mestra:** O criativo DEVE ser construído em torno da **Estrutura de Gancho (Hook) Selecionada** e usar o **Tipo de Linguagem** especificado.
 
     ${awarenessInstructions}
 
-    **Diretrizes Essenciais (Projeto Andrômeda - NÃO IGNORE):**
-    1.  **Foco no Processo:** Mostre o "como", não apenas o "o quê". Evite promessas exageradas. Prefira "Descobri um método que restaurou meu metabolismo...".
-    2.  **Estrutura A.I.M.E. (para o texto do anúncio):** Awaken (Despertar), Inform (Informar), Mechanism (Mecanismo), Evoke (Evocar).
-    3.  **Equilíbrio:** 40% Racional/Mecanismo, 40% Emocional/História, 20% Comercial/CTA.
-    4.  **Proibido Atributos Pessoais:** Não use "Você que...". Fale em primeira pessoa.
-    5.  **Sem "Antes e Depois" Direto:** Evite promessas absolutas.
+    ${languageInstructions}
+
+    **Lembrete crítico (Anti-bloqueio Andromeda):**
+    1. **Foco Absoluto no Nível:** Nunca misture ganchos ou CTAs de níveis de consciência diferentes. O criativo deve ser 100% focado no nível de consciência selecionado.
+    2. **Sem Atributos Pessoais:** Não use "Você que...". Fale na primeira pessoa ou de forma impessoal.
+    3. **Processo > Promessa:** Mostre o "como", não apenas o "o quê". Evite promessas exageradas.
+    4. **Sem "Antes e Depois" Direto:** Foque na transformação emocional ou de processo.
 
     **Tarefa:**
   `;
 
   switch (creativeType) {
-    case CreativeType.UGC_VIDEO:
-    case CreativeType.MINI_VSL:
-      return `${basePrompt}Crie o texto completo da narração para um vídeo de no máximo 40 segundos. O tom deve ser autêntico.
-      **Estrutura Obrigatória:** Estruture a narração seguindo OBRIGATÓAMENTE o framework A.I.M.E. e identifique CADA FASE com um marcador claro no início da linha, exatamente como nos exemplos: [A] Awaken:, [I] Inform:, [M] Mechanism:, [E] Evoke:.
-      Para cada trecho da narração, adicione entre parênteses uma sugestão de imagem ou vídeo. Exemplo: "[A] Awaken: Eu estava cansada... (imagem de uma pessoa frustrada)".
-      **IMPORTANTE:** Comece a resposta DIRETAMENTE com '[A] Awaken:'. Não adicione nenhum texto introdutorio, cabeçalho ou observação antes do roteiro.`;
-    
-    case CreativeType.IMAGE_FEED:
-    case CreativeType.IMAGE_STORIES:
-         return `
-            Você é um diretor de arte e copywriter sênior, especialista em criar anúncios de imagem de altíssima conversão para Meta Ads, seguindo as diretrizes do "Projeto Andrômeda".
+    case CreativeType.VIDEO_UGC:
+      return `${basePrompt}
+      Crie o roteiro completo (narração e sugestões visuais) para um vídeo de até 45 segundos. O tom deve ser autêntico.
+      
+      **Estrutura A.I.M.E. Obrigatória:**
+      O roteiro DEVE ser estruturado usando o framework A.I.M.E. e o gancho selecionado. Use as marcações [A], [I], [M], [E] para identificar cada seção:
+      - **[A] Awaken:** A provocação inicial. DEVE incorporar o gancho "${hook}".
+      - **[I] Inform:** Eduque sobre o problema de forma concisa.
+      - **[M] Mechanism:** Apresente o mecanismo único ou a causa real do problema.
+      - **[E] Evoke:** Evoque uma emoção e termine com uma chamada para ação (CTA). **A CTA DEVE seguir esta regra estrita:** ${ctaInstructions}
 
+      Para cada trecho da narração, adicione entre parênteses uma sugestão de imagem ou vídeo. Exemplo: "[A] Você se lembra de quem era antes de desistir do seu corpo? (imagem de uma pessoa frustrada com o reflexo)".
+      
+      **IMPORTANTE:** Comece a resposta DIRETAMENTE com a primeira linha da narração, já com a marcação [A]. Não adicione nenhum texto introdutório, cabeçalho ou observação antes do roteiro.`;
+    
+    case CreativeType.MINI_VSL:
+      return `${basePrompt}
+      Crie o roteiro completo (narração e sugestões visuais) para uma Mini VSL de 40 segundos. O tom deve ser direto, persuasivo e focado na conversão.
+      
+      **Estrutura A.I.M.E. Obrigatória:**
+      O roteiro DEVE ser estruturado usando o framework A.I.M.E. e o gancho selecionado. Use as marcações [A], [I], [M], [E] para identificar cada seção:
+      - **[A] Awaken:** A provocação inicial. DEVE incorporar o gancho "${hook}". Seja rápido e direto.
+      - **[I] Inform:** Eduque sobre o problema, agitando a dor de forma concisa.
+      - **[M] Mechanism:** Apresente o mecanismo único ou a solução de forma clara e como a grande novidade.
+      - **[E] Evoke:** Evoque o desejo pela solução e termine com uma chamada para ação (CTA) clara e direta. **A CTA DEVE seguir esta regra estrita:** ${ctaInstructions}
+
+      Para cada trecho da narração, adicione entre parênteses uma sugestão de visual (pode ser texto na tela, animações simples, ou cenas de banco de imagens). Exemplo: "[A] Você já se sentiu preso em um ciclo vicioso? (Texto 'Ciclo Vicioso' aparece na tela com um efeito de loop)".
+      
+      **IMPORTANTE:** Comece a resposta DIRETAMENTE com a primeira linha da narração, já com a marcação [A]. Não adicione nenhum texto introdutório, cabeçalho ou observação antes do roteiro.`;
+
+    case CreativeType.IMAGEM_UNICA:
+         return `
+            ${basePrompt}
             **Sua Missão:** Gerar os componentes para um anúncio de imagem. Você deve fornecer:
             1. A descrição para uma imagem de alto impacto (sem texto).
-            2. O texto (copy) para ser colocado sobre essa imagem.
-
-            **Nicho:** ${niche}
-            **Nível de Consciência do Público:** ${awarenessLevel}
-            **Detalhes do Produto/Oferta:** ${productDetails || 'Não especificado.'}
-            **Chamada para Ação (CTA) OBRIGÁTORIA:** "${callToAction}"
-
-            **Instrução Crítica:** A descrição da imagem e o texto para a imagem DEVEM OBRIGATORIAMENTE se basear e incorporar os "Detalhes do Produto/Oferta". Este é o elemento central do criativo. Se os detalhes não forem especificados, use seu conhecimento sobre o nicho.
-
-            ${awarenessInstructions}
-
-            **Diretrizes (NÃO IGNORE):**
-            *   **Descrição da Imagem:** Descreva uma imagem fotorrealista, de alta qualidade e que chame a atenção, perfeitamente alinhada ao nicho e ao nível de consciência. A imagem DEVE SER GERADA SEM NENHUM TEXTO. A descrição deve ser detalhada o suficiente para uma IA de imagem criar a cena perfeitamente.
-            *   **Texto para Imagem:** Crie um texto curto, poderoso e conciso para ser sobreposto na imagem. Use a estrutura AIDA (Atenção, Interesse, Desejo, Ação) de forma compacta e alinhada ao nível de consciência. O texto deve estar em **Português do Brasil** e incluir a CTA "${callToAction}".
-            *   **Conformidade Andrômeda:** Evite promessas exageradas, "antes e depois" e não use "você que...".
+            2. O texto (headline/copy) para ser colocado sobre essa imagem.
+            
+            **Diretrizes Específicas:**
+            *   **Descrição da Imagem:** Descreva uma imagem fotorrealista e de alta qualidade que traduza visualmente o conceito do gancho "${hook}". A imagem deve ser a representação visual do gancho.
+            *   **Texto para Imagem:** Crie um texto curto e poderoso que execute a estrutura do gancho "${hook}" de forma direta e concisa.
 
             **Formato de Saída OBRIGATÓRIO:** Responda com um único objeto JSON, com a seguinte estrutura:
             {
-              "image_description": "Sua descrição detalhada da imagem aqui.",
-              "image_text": "Seu texto curto para a imagem aqui."
+              "image_description": "Sua descrição detalhada da imagem aqui, baseada no hook.",
+              "image_text": "Seu texto curto para a imagem aqui, aplicando o hook."
             }
         `;
-    case CreativeType.CAROUSEL:
+    case CreativeType.CARROSSEL:
         return `
-            Você é um diretor de arte e copywriter sênior, especialista em criar anúncios de carrossel de altíssima conversão para Meta Ads, seguindo as diretrizes do "Projeto Andrômeda".
-
-            **Sua Missão:** Gerar os componentes para um anúncio de carrossel com ${carouselSlidesCount} slides. Você deve fornecer:
+            ${basePrompt}
+             **Sua Missão:** Gerar os componentes para um anúncio de carrossel com ${carouselSlidesCount} slides. Você deve fornecer:
             1. Uma descrição para a imagem de CADA slide.
             2. O texto (copy) para ser colocado sobre a imagem de CADA slide.
 
-            **Nicho:** ${niche}
-            **Nível de Consciência do Público:** ${awarenessLevel}
-            **Detalhes do Produto/Oferta:** ${productDetails || 'Não especificado.'}
-            **Chamada para Ação (CTA) OBRIGÁTORIA:** "${callToAction}" (Inclua a CTA no texto do último slide).
-
-            **Instrução Crítica:** A descrição e o texto de CADA slide DEVEM OBRIGATORIAMENTE se basear e incorporar os "Detalhes do Produto/Oferta". Este é o elemento central do criativo. Se os detalhes não forem especificados, use seu conhecimento sobre o nicho.
-
-            ${awarenessInstructions}
-
-            **Diretrizes (NÃO IGNORE):**
-            *   **Descrição da Imagem:** Para cada slide, descreva uma imagem fotorrealista e de alta qualidade. As imagens devem contar uma micro-história ou apresentar diferentes benefícios/ângulos do produto, sempre respeitando o nível de consciência. AS IMAGENS DEVEM SER GERADAS SEM NENHUM TEXTO.
-            *   **Texto para Imagem:** Para cada slide, crie um texto curto e impactante. A soma dos textos deve seguir uma narrativa lógica e alinhada ao nível de consciência. O último slide deve conter a CTA.
-            *   **Conformidade Andrômeda:** Evite promessas exageradas, "antes e depois" e não use "você que...".
+            **Diretrizes Específicas:**
+            *   **Narrativa do Carrossel:** O carrossel deve contar uma micro-história ou apresentar um argumento progressivo. O primeiro slide DEVE aplicar o gancho "${hook}". Os slides seguintes devem desenvolver a ideia, respeitando o nível de consciência. O último slide deve ter uma chamada para ação clara.
+            *   **Descrição das Imagens:** Descreva imagens fotorrealistas que sigam a narrativa do carrossel.
+            *   **Textos dos Slides:** Crie textos curtos e impactantes para cada slide.
 
             **Formato de Saída OBRIGATÓRIO:** Responda com um único objeto JSON, com a seguinte estrutura:
             {
               "slides": [
-                { "image_description": "Descrição detalhada para o slide 1.", "image_text": "Texto curto para o slide 1." },
-                { "image_description": "Descrição detalhada para o slide 2.", "image_text": "Texto curto para o slide 2." }
+                { "image_description": "Descrição para o slide 1, aplicando o hook '${hook}'.", "image_text": "Texto para o slide 1, aplicando o hook '${hook}'." },
+                { "image_description": "Descrição para o slide 2.", "image_text": "Texto para o slide 2." }
               ]
             }
         `;
@@ -136,51 +237,38 @@ const getPrompt = (niche: string, awarenessLevel: AwarenessLevel, creativeType: 
   }
 };
 
-const getVariationPrompt = (niche: string, awarenessLevel: AwarenessLevel, creativeType: CreativeType, productDetails: string, callToAction: string, originalText: string): string => {
+const getVariationPrompt = (niche: string, awarenessLevel: AwarenessLevel, creativeType: CreativeType, productDetails: string, hook: string, languageType: LanguageType, originalText: string): string => {
     const awarenessInstructions = getAwarenessLevelInstructions(awarenessLevel);
-    const basePrompt = `
-      Você é um especialista em copywriting para Meta Ads, treinado nas diretrizes do "Projeto Andrômeda".
-      Sua tarefa é criar uma VARIAÇÃO de um texto de anúncio já existente, mantendo o mesmo nicho, oferta e nível de consciência, mas mudando a abordagem ou o ângulo.
+    const languageInstructions = getLanguageTypeInstructions(languageType);
+    return `
+      Você é um copywriter de elite especialista no framework "Projeto Andrômeda".
+      Sua tarefa é criar uma VARIAÇÃO de um texto de anúncio, mantendo o mesmo nicho, oferta, nível de consciência e, mais importante, a mesma ESTRUTURA DE GANCHO e TIPO DE LINGUAGEM.
 
-      **Nicho do Cliente:** ${niche}
-      **Nível de Consciência do Público:** ${awarenessLevel}
-      **Detalhes do Produto/Oferta:** ${productDetails || 'Não especificado.'}
-      **Chamada para Ação (CTA) Sugerida:** ${callToAction || 'Clique em "Saiba Mais"'}
+      **Nicho:** ${niche}
+      **Nível de Consciência:** ${awarenessLevel}
+      **Detalhes da Oferta:** ${productDetails || 'Não especificado.'}
       **Tipo de Criativo:** ${creativeType}
+      **Estrutura de Gancho (Hook) a ser mantida:** "${hook}"
+      **Tipo de Linguagem a ser mantida:** ${languageType}
 
-      **Instrução Crítica:** A nova variação DEVE OBRIGATORIAMENTE continuar se baseando e incorporando os "Detalhes do Produto/Oferta" fornecidos.
-
+      **Diretrizes do Nível de Consciência (para referência):**
       ${awarenessInstructions}
+
+      **Diretrizes do Tipo de Linguagem (para referência):**
+      ${languageInstructions}
 
       **Texto Original para ser variado:**
       ---
       ${originalText}
       ---
-    `;
+      
+      **Sua Tarefa:**
+      Crie uma nova versão do texto que AINDA utilize a estrutura de gancho "${hook}" e o tipo de linguagem "${languageType}", mas com uma abordagem, ângulo ou exemplo diferente. Seja criativo, mas não mude os fundamentos.
 
-    switch (creativeType) {
-        case CreativeType.UGC_VIDEO:
-        case CreativeType.MINI_VSL:
-            return `${basePrompt}
-              **Sua Tarefa:** Crie uma narração completamente NOVA, mas com o mesmo objetivo e nível de consciência do texto original. Explore um gancho diferente, uma dor diferente, ou uma nova perspectiva.
-              **Estrutura Obrigatória:** Mantenha a estrutura A.I.M.E. e identifique CADA FASE: [A] Awaken:, [I] Inform:, [M] Mechanism:, [E] Evoke:.
-              **IMPORTANTE:** Comece a resposta DIRETAMENTE com '[A] Awaken:'. Não adicione nenhum texto introdutório.
-            `;
-        case CreativeType.IMAGE_FEED:
-        case CreativeType.IMAGE_STORIES:
-            return `${basePrompt}
-              **Sua Tarefa:** Crie uma NOVA versão do texto para ser sobreposto na imagem. O novo texto deve ser conciso, poderoso, manter a CTA "${callToAction}" e respeitar o nível de consciência. Tente uma abordagem diferente da original.
-              **Formato de Saída OBRIGATÓRIO:** Responda com um único objeto JSON, com a seguinte estrutura:
-              {
-                "image_text": "Sua NOVA variação de texto para a imagem aqui."
-              }
-            `;
-        case CreativeType.CAROUSEL:
-            // This should be disabled in the UI, but we safeguard it here.
-            return "A variação de carrosséis não é suportada.";
-        default:
-            return "Crie uma variação do texto fornecido.";
-    }
+      **Formato de Saída:**
+      - Para vídeos, retorne apenas o novo roteiro (narração e sugestões visuais). Se o original usava a estrutura A.I.M.E., a variação também deve usar. Comece diretamente com a primeira linha da narração.
+      - Para imagens ou carrosséis, retorne um único objeto JSON com a chave "image_text" (para imagem única) ou "slides" (para carrossel), contendo o(s) novo(s) texto(s).
+    `;
 };
 
 const generateSingleImage = async (
@@ -231,7 +319,8 @@ export const generateCreative = async (
     awarenessLevel: AwarenessLevel,
     creativeType: CreativeType, 
     productDetails: string, 
-    callToAction: string, 
+    hook: string,
+    languageType: LanguageType,
     imageSize: ImageSize,
     carouselSlidesCount: number,
     productImageBase64: string | null,
@@ -241,26 +330,18 @@ export const generateCreative = async (
         throw new Error("API key is not configured.");
     }
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const prompt = getPrompt(niche, awarenessLevel, creativeType, productDetails, callToAction, imageSize, carouselSlidesCount);
+    const prompt = getPrompt(niche, awarenessLevel, creativeType, productDetails, hook, languageType, imageSize, carouselSlidesCount);
     
-    const isImageType = [CreativeType.IMAGE_FEED, CreativeType.IMAGE_STORIES, CreativeType.CAROUSEL].includes(creativeType);
-
-    if (!isImageType) {
+    if ([CreativeType.VIDEO_UGC, CreativeType.MINI_VSL].includes(creativeType)) {
         const textResponse = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
         });
 
-        let responseText = textResponse.text;
-        const scriptStartIndex = responseText.search(/(?:\*{0,2})\[A]\s*Awaken:/i);
-        if (scriptStartIndex > 0) {
-            responseText = responseText.substring(scriptStartIndex);
-        }
-
-        return { text: responseText, imageUrl: null };
+        return { text: textResponse.text, imageUrl: null };
     }
 
-    if(creativeType === CreativeType.CAROUSEL) {
+    if(creativeType === CreativeType.CARROSSEL) {
          const planResponse = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
@@ -314,7 +395,7 @@ export const generateCreative = async (
     }
 
 
-    // Logic for single image types (Feed, Stories)
+    // Logic for single image types (IMAGEM_UNICA)
     const planResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
@@ -349,8 +430,8 @@ export const generateCreative = async (
     return { text: image_text, imageUrl };
 };
 
-export const generateCreativeVariation = async (niche: string, awarenessLevel: AwarenessLevel, creativeType: CreativeType, productDetails: string, callToAction: string, imageSize: ImageSize, originalText: string): Promise<string> => {
-    if (creativeType === CreativeType.CAROUSEL) {
+export const generateCreativeVariation = async (niche: string, awarenessLevel: AwarenessLevel, creativeType: CreativeType, productDetails: string, hook: string, languageType: LanguageType, imageSize: ImageSize, originalText: string): Promise<string> => {
+    if (creativeType === CreativeType.CARROSSEL) {
         throw new Error("A geração de variação não é suportada para o formato Carrossel.");
     }
 
@@ -358,10 +439,9 @@ export const generateCreativeVariation = async (niche: string, awarenessLevel: A
         throw new Error("API key is not configured.");
     }
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const prompt = getVariationPrompt(niche, awarenessLevel, creativeType, productDetails, callToAction, originalText);
-    const isImageType = [CreativeType.IMAGE_FEED, CreativeType.IMAGE_STORIES].includes(creativeType);
-
-    if (!isImageType) {
+    const prompt = getVariationPrompt(niche, awarenessLevel, creativeType, productDetails, hook, languageType, originalText);
+    
+    if ([CreativeType.VIDEO_UGC, CreativeType.MINI_VSL].includes(creativeType)) {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
@@ -481,19 +561,16 @@ export const generateAudio = async (text: string, voiceName: string, voiceStyle:
     
     let narrationOnly = text;
 
-    // Step 1: Split the text by A.I.M.E. markers to isolate narration blocks.
-    const narrationBlocks = narrationOnly.split(/\s*\*{0,2}\[[AIME]\][^\n:]+:\s*\*{0,2}/gi);
+    // Step 1: Remove AIME tags like [A], [I], etc.
+    narrationOnly = narrationOnly.replace(/\[[A-Z]\]/g, '');
 
-    // Step 2: Join the blocks, filtering out any empty strings that might result from the split.
-    narrationOnly = narrationBlocks.filter(block => block.trim() !== "").join("\n");
-
-    // Step 3: Remove visual cues in parentheses (e.g., "(Vídeo da pessoa...)")
+    // Step 2: Remove visual cues in parentheses (e.g., "(Vídeo da pessoa...)")
     narrationOnly = narrationOnly.replace(/\([^)]+\)/g, "");
     
-    // Step 4: Remove any remaining markdown characters.
+    // Step 3: Remove any markdown characters.
     narrationOnly = narrationOnly.replace(/[\*_`#]/g, "");
 
-    // Step 5: Trim and consolidate whitespace into single spaces for a clean input.
+    // Step 4: Trim and consolidate whitespace into single spaces for a clean input.
     narrationOnly = narrationOnly.trim().replace(/\s+/g, ' ');
 
     if (!narrationOnly) {

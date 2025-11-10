@@ -1,9 +1,8 @@
 export enum CreativeType {
-  UGC_VIDEO = 'Vídeo UGC (Narração)',
-  MINI_VSL = 'Mini VSL (Narração)',
-  IMAGE_FEED = 'Imagem para Feed (com Geração de Imagem)',
-  IMAGE_STORIES = 'Imagem para Stories (com Geração de Imagem)',
-  CAROUSEL = 'Carrossel (com Geração de Imagem)',
+  VIDEO_UGC = 'Vídeo UGC (Reels/Stories)',
+  MINI_VSL = 'Mini VSL (40 segundos)',
+  IMAGEM_UNICA = 'Imagem Única (Feed/Stories)',
+  CARROSSEL = 'Carrossel (Educativo/Oferta)',
 }
 
 export enum AwarenessLevel {
@@ -11,7 +10,17 @@ export enum AwarenessLevel {
   PROBLEM_AWARE = 'Consciente do Problema',
   SOLUTION_AWARE = 'Consciente da Solução',
   PRODUCT_AWARE = 'Consciente do Produto',
-  MOST_AWARE = 'Consciente Total',
+  ULTRA_AWARE = 'Ultra Consciente',
+}
+
+export enum LanguageType {
+  SENSORIAL = 'LINGUAGEM SENSORIAL (Imersiva)',
+  IDENTIFICATION = 'LINGUAGEM DE IDENTIFICAÇÃO (Espelho)',
+  MECHANISM = 'LINGUAGEM DE MECANISMO (Autoridade + Revelação)',
+  CONTRAST = 'LINGUAGEM DE CONTRASTE (Choque Controlado)',
+  REVELATION = 'LINGUAGEM DE REVELAÇÃO (Confidencial)',
+  STATUS = 'LINGUAGEM DE STATUS (Transformacional)',
+  DECISION = 'LINGUAGEM DE DECISÃO (Direta, Rápida, Sem Ruído)',
 }
 
 export type ImageSize = '1:1' | '4:5' | '9:16';
