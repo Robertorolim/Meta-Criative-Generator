@@ -12,6 +12,8 @@ const App: React.FC = () => {
   const [awarenessLevel, setAwarenessLevel] = useState<AwarenessLevel>(AWARENESS_LEVEL_OPTIONS[0].value);
   const [languageType, setLanguageType] = useState<LanguageType>(LANGUAGE_TYPE_OPTIONS[0].value);
   const [productDetails, setProductDetails] = useState<string>('');
+  const [targetGender, setTargetGender] = useState<string>('Ambos');
+  const [targetAge, setTargetAge] = useState<string>('');
   
   const initialHook = HOOK_OPTIONS_BY_AWARENESS[awarenessLevel]?.[0]?.value || '';
   const [selectedHook, setSelectedHook] = useState<string>(initialHook);
@@ -102,6 +104,8 @@ const App: React.FC = () => {
         productDetails, 
         selectedHook,
         languageType,
+        targetGender,
+        targetAge,
         imageSize,
         creativeType === CreativeType.CARROSSEL ? carouselSlidesCount : 1,
         productImageBase64,
@@ -114,7 +118,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedNiche, customNiche, productDetails, selectedHook, creativeType, imageSize, carouselSlidesCount, productImageFile, awarenessLevel, languageType]);
+  }, [selectedNiche, customNiche, productDetails, selectedHook, creativeType, imageSize, carouselSlidesCount, productImageFile, awarenessLevel, languageType, targetGender, targetAge]);
 
   const handleGenerateVariation = useCallback(async (originalText: string) => {
     const niche = selectedNiche === 'Outro' ? customNiche : selectedNiche;
@@ -123,7 +127,7 @@ const App: React.FC = () => {
     setAudioUrl(null); // Clear previous audio
     setAudioError(null);
     try {
-      const newText = await generateCreativeVariation(niche, awarenessLevel, creativeType, productDetails, selectedHook, languageType, imageSize, originalText);
+      const newText = await generateCreativeVariation(niche, awarenessLevel, creativeType, productDetails, selectedHook, languageType, targetGender, targetAge, imageSize, originalText);
       setGeneratedContent(prevContent => ({
         ...prevContent!,
         text: newText,
@@ -134,7 +138,7 @@ const App: React.FC = () => {
     } finally {
       setIsVariationLoading(false);
     }
-  }, [selectedNiche, customNiche, productDetails, selectedHook, creativeType, imageSize, awarenessLevel, languageType]);
+  }, [selectedNiche, customNiche, productDetails, selectedHook, creativeType, imageSize, awarenessLevel, languageType, targetGender, targetAge]);
 
   const handleGenerateAudio = useCallback(async (text: string, voiceName: string, voiceStyle: VoiceStyle, styleHint?: VoiceOption['styleHint']) => {
     setIsAudioLoading(true);
@@ -167,6 +171,10 @@ const App: React.FC = () => {
             setLanguageType={setLanguageType}
             productDetails={productDetails}
             setProductDetails={setProductDetails}
+            targetGender={targetGender}
+            setTargetGender={setTargetGender}
+            targetAge={targetAge}
+            setTargetAge={setTargetAge}
             selectedHook={selectedHook}
             setSelectedHook={setSelectedHook}
             creativeType={creativeType}

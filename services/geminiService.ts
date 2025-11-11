@@ -144,7 +144,18 @@ const getCTAInstructions = (awarenessLevel: AwarenessLevel): string => {
 };
 
 
-const getPrompt = (niche: string, awarenessLevel: AwarenessLevel, creativeType: CreativeType, productDetails: string, hook: string, languageType: LanguageType, imageSize: ImageSize, carouselSlidesCount: number): string => {
+const getPrompt = (
+    niche: string, 
+    awarenessLevel: AwarenessLevel, 
+    creativeType: CreativeType, 
+    productDetails: string, 
+    hook: string, 
+    languageType: LanguageType, 
+    targetGender: string,
+    targetAge: string,
+    imageSize: ImageSize, 
+    carouselSlidesCount: number
+): string => {
   const awarenessInstructions = getAwarenessLevelInstructions(awarenessLevel);
   const languageInstructions = getLanguageTypeInstructions(languageType);
   const ctaInstructions = getCTAInstructions(awarenessLevel);
@@ -152,13 +163,18 @@ const getPrompt = (niche: string, awarenessLevel: AwarenessLevel, creativeType: 
     Você é um copywriter de elite e diretor de arte para Meta Ads, especialista no framework "Projeto Andrômeda". Sua missão é criar um criativo de anúncio perfeitamente calibrado para o público.
 
     **Nicho do Cliente:** ${niche}
+    
+    **Público-Alvo:**
+    - **Gênero:** ${targetGender}
+    - **Idade:** ${targetAge || 'Não especificada.'}
+
     **Nível de Consciência do Público:** ${awarenessLevel}
     **Tipo de Linguagem:** ${languageType}
     **Estrutura de Gancho (Hook) Selecionada:** "${hook}"
     **Detalhes do Produto/Oferta:** ${productDetails || 'Não especificado.'}
     **Tipo de Criativo:** ${creativeType}
 
-    **Diretriz Mestra:** O criativo DEVE ser construído em torno da **Estrutura de Gancho (Hook) Selecionada** e usar o **Tipo de Linguagem** especificado.
+    **Diretriz Mestra:** O criativo DEVE ser construído em torno da **Estrutura de Gancho (Hook) Selecionada** e usar o **Tipo de Linguagem** especificado. A linguagem, os exemplos e o tom devem ser adaptados para ressoar especificamente com o público-alvo (gênero e idade) definido.
 
     ${awarenessInstructions}
 
@@ -176,7 +192,7 @@ const getPrompt = (niche: string, awarenessLevel: AwarenessLevel, creativeType: 
   switch (creativeType) {
     case CreativeType.VIDEO_UGC:
       return `${basePrompt}
-      Crie o roteiro completo (narração e sugestões visuais) para um vídeo de até 45 segundos. O tom deve ser autêntico.
+      Crie o roteiro completo (narração e sugestões visuais) para um vídeo de até 45 segundos. O tom deve ser autêntico. A narração DEVE ser em primeira pessoa (usando "eu", "meu", "senti", etc.) para criar uma conexão pessoal e autêntica, como se fosse um depoimento real.
       
       **Estrutura A.I.M.E. Obrigatória:**
       O roteiro DEVE ser estruturado usando o framework A.I.M.E. e o gancho selecionado. Use as marcações [A], [I], [M], [E] para identificar cada seção:
@@ -185,7 +201,7 @@ const getPrompt = (niche: string, awarenessLevel: AwarenessLevel, creativeType: 
       - **[M] Mechanism:** Apresente o mecanismo único ou a causa real do problema.
       - **[E] Evoke:** Evoque uma emoção e termine com uma chamada para ação (CTA). **A CTA DEVE seguir esta regra estrita:** ${ctaInstructions}
 
-      Para cada trecho da narração, adicione entre parênteses uma sugestão de imagem ou vídeo. Exemplo: "[A] Você se lembra de quem era antes de desistir do seu corpo? (imagem de uma pessoa frustrada com o reflexo)".
+      Para cada trecho da narração, adicione entre parênteses uma sugestão de imagem ou vídeo. Exemplo: "[A] Eu me lembro de quem eu era antes de desistir do meu corpo... (imagem minha, frustrado com o reflexo no espelho)".
       
       **IMPORTANTE:** Comece a resposta DIRETAMENTE com a primeira linha da narração, já com a marcação [A]. Não adicione nenhum texto introdutório, cabeçalho ou observação antes do roteiro.`;
     
@@ -246,7 +262,7 @@ const getPrompt = (niche: string, awarenessLevel: AwarenessLevel, creativeType: 
   }
 };
 
-const getVariationPrompt = (niche: string, awarenessLevel: AwarenessLevel, creativeType: CreativeType, productDetails: string, hook: string, languageType: LanguageType, originalText: string): string => {
+const getVariationPrompt = (niche: string, awarenessLevel: AwarenessLevel, creativeType: CreativeType, productDetails: string, hook: string, languageType: LanguageType, targetGender: string, targetAge: string, originalText: string): string => {
     const awarenessInstructions = getAwarenessLevelInstructions(awarenessLevel);
     const languageInstructions = getLanguageTypeInstructions(languageType);
     return `
@@ -254,11 +270,18 @@ const getVariationPrompt = (niche: string, awarenessLevel: AwarenessLevel, creat
       Sua tarefa é criar uma VARIAÇÃO de um texto de anúncio, mantendo o mesmo nicho, oferta, nível de consciência e, mais importante, a mesma ESTRUTURA DE GANCHO e TIPO DE LINGUAGEM.
 
       **Nicho:** ${niche}
+      
+      **Público-Alvo:**
+      - **Gênero:** ${targetGender}
+      - **Idade:** ${targetAge || 'Não especificada.'}
+
       **Nível de Consciência:** ${awarenessLevel}
       **Detalhes da Oferta:** ${productDetails || 'Não especificado.'}
       **Tipo de Criativo:** ${creativeType}
       **Estrutura de Gancho (Hook) a ser mantida:** "${hook}"
       **Tipo de Linguagem a ser mantida:** ${languageType}
+
+      **Instrução Adicional:** A linguagem, os exemplos e o tom da variação devem continuar adaptados para ressoar com o público-alvo (gênero e idade) definido.
 
       **Diretrizes do Nível de Consciência (para referência):**
       ${awarenessInstructions}
@@ -330,6 +353,8 @@ export const generateCreative = async (
     productDetails: string, 
     hook: string,
     languageType: LanguageType,
+    targetGender: string,
+    targetAge: string,
     imageSize: ImageSize,
     carouselSlidesCount: number,
     productImageBase64: string | null,
@@ -339,7 +364,7 @@ export const generateCreative = async (
         throw new Error("API key is not configured.");
     }
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const prompt = getPrompt(niche, awarenessLevel, creativeType, productDetails, hook, languageType, imageSize, carouselSlidesCount);
+    const prompt = getPrompt(niche, awarenessLevel, creativeType, productDetails, hook, languageType, targetGender, targetAge, imageSize, carouselSlidesCount);
     
     if ([CreativeType.VIDEO_UGC, CreativeType.MINI_VSL].includes(creativeType)) {
         const textResponse = await ai.models.generateContent({
@@ -439,7 +464,7 @@ export const generateCreative = async (
     return { text: image_text, imageUrl };
 };
 
-export const generateCreativeVariation = async (niche: string, awarenessLevel: AwarenessLevel, creativeType: CreativeType, productDetails: string, hook: string, languageType: LanguageType, imageSize: ImageSize, originalText: string): Promise<string> => {
+export const generateCreativeVariation = async (niche: string, awarenessLevel: AwarenessLevel, creativeType: CreativeType, productDetails: string, hook: string, languageType: LanguageType, targetGender: string, targetAge: string, imageSize: ImageSize, originalText: string): Promise<string> => {
     if (creativeType === CreativeType.CARROSSEL) {
         throw new Error("A geração de variação não é suportada para o formato Carrossel.");
     }
@@ -448,7 +473,7 @@ export const generateCreativeVariation = async (niche: string, awarenessLevel: A
         throw new Error("API key is not configured.");
     }
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const prompt = getVariationPrompt(niche, awarenessLevel, creativeType, productDetails, hook, languageType, originalText);
+    const prompt = getVariationPrompt(niche, awarenessLevel, creativeType, productDetails, hook, languageType, targetGender, targetAge, originalText);
     
     if ([CreativeType.VIDEO_UGC, CreativeType.MINI_VSL].includes(creativeType)) {
         const response = await ai.models.generateContent({

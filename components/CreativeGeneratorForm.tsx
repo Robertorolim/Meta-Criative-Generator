@@ -14,6 +14,10 @@ interface CreativeGeneratorFormProps {
   setLanguageType: (type: LanguageType) => void;
   productDetails: string;
   setProductDetails: (details: string) => void;
+  targetGender: string;
+  setTargetGender: (gender: string) => void;
+  targetAge: string;
+  setTargetAge: (age: string) => void;
   selectedHook: string;
   setSelectedHook: (hook: string) => void;
   creativeType: CreativeType;
@@ -53,6 +57,10 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
   setLanguageType,
   productDetails,
   setProductDetails,
+  targetGender,
+  setTargetGender,
+  targetAge,
+  setTargetAge,
   selectedHook,
   setSelectedHook,
   creativeType,
@@ -157,7 +165,34 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
           )}
         </FormSection>
 
-        <FormSection number={2} title="Nível de Consciência">
+        <FormSection number={2} title="Público-Alvo">
+            <div>
+                <label htmlFor="targetGender" className="block text-sm font-medium text-gray-300 mb-2">Gênero</label>
+                <select
+                    id="targetGender"
+                    value={targetGender}
+                    onChange={(e) => setTargetGender(e.target.value)}
+                    className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
+                >
+                    <option value="Ambos" className="bg-gray-800">Ambos</option>
+                    <option value="Homem" className="bg-gray-800">Homem</option>
+                    <option value="Mulher" className="bg-gray-800">Mulher</option>
+                </select>
+            </div>
+            <div>
+                <label htmlFor="targetAge" className="block text-sm font-medium text-gray-300 mb-2">Idade</label>
+                <input
+                    type="text"
+                    id="targetAge"
+                    value={targetAge}
+                    onChange={(e) => setTargetAge(e.target.value)}
+                    placeholder="Ex: 25-34"
+                    className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
+                />
+            </div>
+        </FormSection>
+
+        <FormSection number={3} title="Nível de Consciência">
             <select
                 id="awarenessLevel"
                 value={awarenessLevel}
@@ -177,7 +212,7 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
             )}
         </FormSection>
 
-        <FormSection number={3} title="Tipo de Linguagem">
+        <FormSection number={4} title="Tipo de Linguagem">
             <select
                 id="languageType"
                 value={languageType}
@@ -197,7 +232,7 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
             )}
         </FormSection>
 
-        <FormSection number={4} title="Detalhes do Produto/Oferta">
+        <FormSection number={5} title="Detalhes do Produto/Oferta">
             <textarea
                 id="productDetails"
                 value={productDetails}
@@ -226,7 +261,7 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
             )}
         </FormSection>
         
-        <FormSection number={5} title="Estrutura do Criativo / Gancho">
+        <FormSection number={6} title="Estrutura do Criativo / Gancho">
           <select
             id="hook"
             value={selectedHook}
@@ -241,7 +276,7 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
           </select>
         </FormSection>
         
-        <FormSection number={6} title="Formato do Criativo">
+        <FormSection number={7} title="Formato do Criativo">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <select
                 id="creativeType"
