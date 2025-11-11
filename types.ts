@@ -21,6 +21,7 @@ export enum LanguageType {
   REVELATION = 'LINGUAGEM DE REVELAÇÃO (Confidencial)',
   STATUS = 'LINGUAGEM DE STATUS (Transformacional)',
   DECISION = 'LINGUAGEM DE DECISÃO (Direta, Rápida, Sem Ruído)',
+  STRUCTURED_CONVERSATIONAL = 'LINGUAGEM CONVERSACIONAL ESTRUTURADA',
 }
 
 export type ImageSize = '1:1' | '4:5' | '9:16';

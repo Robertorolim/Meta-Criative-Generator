@@ -91,17 +91,20 @@ export const VOICE_STYLE_OPTIONS: { value: VoiceStyle; label: string }[] = [
 ];
 
 // Lista de vozes revisada e organizada, usando vozes oficiais do Gemini para garantir compatibilidade e gênero correto.
+// Adicionadas variações de estilo para as vozes mais versáteis (Kore e Zephyr) para obter resultados mais humanizados e menos robóticos.
 const femaleVoices: VoiceOption[] = [
-    { name: 'Kore - Clara e calma', apiName: 'Kore', gender: 'female', styleHint: 'calm' },
-    { name: 'Kore - Animada e enérgica', apiName: 'Kore', gender: 'female', styleHint: 'energetic' },
-    { name: 'Kore - Amigável e conversacional', apiName: 'Kore', gender: 'female', styleHint: 'friendly' },
+    { name: 'Kore - Amigável e Conversacional', apiName: 'Kore', gender: 'female', styleHint: 'friendly' },
+    { name: 'Kore - Calma e Clara', apiName: 'Kore', gender: 'female', styleHint: 'calm' },
+    { name: 'Kore - Animada e Energética', apiName: 'Kore', gender: 'female', styleHint: 'energetic' },
 ];
 
 const maleVoices: VoiceOption[] = [
-    { name: 'Zephyr - Amigável e confiável, versátil', apiName: 'Zephyr', gender: 'male' },
-    { name: 'Puck - Jovem e dinâmico, ótimo para anúncios', apiName: 'Puck', gender: 'male' },
-    { name: 'Charon - Profunda e séria, ideal para documentários', apiName: 'Charon', gender: 'male' },
-    { name: 'Fenrir - Forte e assertiva, para mensagens de impacto', apiName: 'Fenrir', gender: 'male' },
+    { name: 'Zephyr - Amigável e Confiável', apiName: 'Zephyr', gender: 'male', styleHint: 'friendly' },
+    { name: 'Zephyr - Calmo e Profissional', apiName: 'Zephyr', gender: 'male', styleHint: 'calm' },
+    { name: 'Zephyr - Dinâmico e Energético', apiName: 'Zephyr', gender: 'male', styleHint: 'energetic' },
+    { name: 'Puck - Jovem e Otimista', apiName: 'Puck', gender: 'male' },
+    { name: 'Charon - Séria e Profunda (Documentário)', apiName: 'Charon', gender: 'male' },
+    { name: 'Fenrir - Forte e Assertiva (Impacto)', apiName: 'Fenrir', gender: 'male' },
 ];
 
 
@@ -173,5 +176,10 @@ export const LANGUAGE_TYPE_OPTIONS: { value: LanguageType; label: string; descri
         value: LanguageType.DECISION,
         label: '⏳ 7. Decisão (Direta)',
         description: 'Uso: Ultra Aware / Urgência. Objetivo: Dar o empurrão final. Exemplo: “Clique e veja por dentro. Você vai entender em 20 segundos por que todos estão falando disso.” Curta, imperativa, sem adjetivos exagerados. Função: Gatilho de ação, fecha o ciclo.',
+    },
+    {
+        value: LanguageType.STRUCTURED_CONVERSATIONAL,
+        label: '🗣️ 8. Conversacional (Estruturada)',
+        description: 'Objetivo: Fazer o espectador sentir que está ouvindo uma conversa, não um vendedor. Ideal para Mini VSLs, Reels e UGC. Combina um tom de orientação, frases curtas, vocabulário familiar e analogias do cotidiano. A chamada para ação (CTA) no final será sempre alinhada com o nível de consciência Andrômeda selecionado.',
     }
 ];

@@ -112,6 +112,15 @@ const getLanguageTypeInstructions = (languageType: LanguageType): string => {
 - **Objetivo:** Dar o empurrão final para a ação, sem ruído.
 - **Como usar:** Seja direto, claro e imperativo. Remova adjetivos desnecessários. Foque no próximo passo simples.
 - **Exemplo:** "Clique e veja por dentro. Você vai entender em 20 segundos por que todos estão falando disso."`;
+        case LanguageType.STRUCTURED_CONVERSATIONAL:
+            return `**Estilo de Linguagem: Conversacional Estruturada (Natural e Persuasiva)**
+- **Objetivo:** Fazer o espectador sentir que está ouvindo uma conversa empática, não um vendedor.
+- **Como usar:** Combine estas 4 camadas:
+    1. **Tom de Orientação:** Use frases como "Deixa eu te explicar de um jeito simples." ou "Olha, talvez ninguém tenha te contado isso, mas...".
+    2. **Frases Curtas e Respiráveis:** Evite blocos longos. Uma ideia por frase. Crie ritmo com pausas.
+    3. **Vocabulário de Leitura Mental:** Use expressões que soam familiares e tocam em sensações universais (frustração, dúvida, esperança). Ex: "Sabe quando você sente que tá fazendo tudo certo, mas nada anda?".
+    4. **Analogias do Cotidiano:** Transforme conceitos complexos em imagens simples. Ex: "É como tentar encher um balde furado — não importa o quanto você trabalhe, tudo escapa.".
+- **IMPORTANTE:** A chamada para ação (CTA) no final do roteiro será fornecida em outra instrução. Você DEVE seguir a instrução de CTA específica, em vez de criar um "microconvite" genérico.`;
         default:
             return '';
     }
