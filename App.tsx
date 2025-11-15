@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { CreativeGeneratorForm } from './components/CreativeGeneratorForm';
 import { CreativeDisplay } from './components/CreativeDisplay';
 import { Header } from './components/Header';
-import { CreativeType, ImageSize, GeneratedContent, VoiceStyle, VoiceOption, AwarenessLevel, LanguageType } from './types';
+import { CreativeType, GeneratedContent, VoiceStyle, VoiceOption, AwarenessLevel, LanguageType } from './types';
 import { generateCreative, generateAudio, generateCreativeVariation } from './services/geminiService';
 import { NICHE_OPTIONS, HOOK_OPTIONS_BY_AWARENESS, AWARENESS_LEVEL_OPTIONS, LANGUAGE_TYPE_OPTIONS } from './constants';
 
@@ -19,9 +19,6 @@ const App: React.FC = () => {
   const [selectedHook, setSelectedHook] = useState<string>(initialHook);
   
   const [creativeType, setCreativeType] = useState<CreativeType>(CreativeType.VIDEO_UGC);
-  const [imageSize, setImageSize] = useState<ImageSize>('1:1');
-  const [carouselSlidesCount, setCarouselSlidesCount] = useState<number>(3);
-  const [productImageFile, setProductImageFile] = useState<File | null>(null);
 
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -79,24 +76,6 @@ const App: React.FC = () => {
     setAudioError(null);
 
     try {
-      let productImageBase64: string | null = null;
-      let productImageMimeType: string | null = null;
-      
-      if (productImageFile) {
-        const promise = new Promise<void>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            const result = event.target?.result as string;
-            productImageBase64 = result.split(',')[1];
-            productImageMimeType = result.split(',')[0].split(':')[1].split(';')[0];
-            resolve();
-          };
-          reader.onerror = (error) => reject(error);
-          reader.readAsDataURL(productImageFile);
-        });
-        await promise;
-      }
-
       const content = await generateCreative(
         niche,
         awarenessLevel,
@@ -106,10 +85,6 @@ const App: React.FC = () => {
         languageType,
         targetGender,
         targetAge,
-        imageSize,
-        creativeType === CreativeType.CARROSSEL ? carouselSlidesCount : 1,
-        productImageBase64,
-        productImageMimeType
       );
       setGeneratedContent(content);
     } catch (e: any) {
@@ -118,7 +93,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedNiche, customNiche, productDetails, selectedHook, creativeType, imageSize, carouselSlidesCount, productImageFile, awarenessLevel, languageType, targetGender, targetAge]);
+  }, [selectedNiche, customNiche, productDetails, selectedHook, creativeType, awarenessLevel, languageType, targetGender, targetAge]);
 
   const handleGenerateVariation = useCallback(async (originalText: string) => {
     const niche = selectedNiche === 'Outro' ? customNiche : selectedNiche;
@@ -127,18 +102,17 @@ const App: React.FC = () => {
     setAudioUrl(null); // Clear previous audio
     setAudioError(null);
     try {
-      const newText = await generateCreativeVariation(niche, awarenessLevel, creativeType, productDetails, selectedHook, languageType, targetGender, targetAge, imageSize, originalText);
-      setGeneratedContent(prevContent => ({
-        ...prevContent!,
+      const newText = await generateCreativeVariation(niche, awarenessLevel, creativeType, productDetails, selectedHook, languageType, targetGender, targetAge, originalText);
+      setGeneratedContent({
         text: newText,
-      }));
+      });
     } catch (e: any) {
       console.error(e);
       setError(e.message ||'Ocorreu um erro ao gerar a variação. Tente novamente.');
     } finally {
       setIsVariationLoading(false);
     }
-  }, [selectedNiche, customNiche, productDetails, selectedHook, creativeType, imageSize, awarenessLevel, languageType, targetGender, targetAge]);
+  }, [selectedNiche, customNiche, productDetails, selectedHook, creativeType, awarenessLevel, languageType, targetGender, targetAge]);
 
   const handleGenerateAudio = useCallback(async (text: string, voiceName: string, voiceStyle: VoiceStyle, styleHint?: VoiceOption['styleHint']) => {
     setIsAudioLoading(true);
@@ -179,16 +153,10 @@ const App: React.FC = () => {
             setSelectedHook={setSelectedHook}
             creativeType={creativeType}
             setCreativeType={setCreativeType}
-            imageSize={imageSize}
-            setImageSize={setImageSize}
             isLoading={isLoading}
             onGenerate={handleGenerate}
             productDetailsHistory={productDetailsHistory}
             onSelectFromHistory={setProductDetails}
-            carouselSlidesCount={carouselSlidesCount}
-            setCarouselSlidesCount={setCarouselSlidesCount}
-            productImageFile={productImageFile}
-            setProductImageFile={setProductImageFile}
           />
           <CreativeDisplay
             content={generatedContent}

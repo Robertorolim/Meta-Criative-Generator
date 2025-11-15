@@ -1,26 +1,9 @@
-import { CreativeType, ImageSize, VoiceStyle, VoiceOption, AwarenessLevel, LanguageType } from './types';
+import { CreativeType, VoiceStyle, VoiceOption, AwarenessLevel, LanguageType } from './types';
 
 export const CREATIVE_TYPE_OPTIONS: { value: CreativeType; label: string }[] = [
   { value: CreativeType.VIDEO_UGC, label: 'Vídeo UGC (Reels/Stories)' },
   { value: CreativeType.MINI_VSL, label: 'Mini VSL (40 segundos)' },
-  { value: CreativeType.IMAGEM_UNICA, label: 'Imagem Única (Feed/Stories)' },
-  { value: CreativeType.CARROSSEL, label: 'Carrossel (Educativo/Oferta)' },
 ];
-
-export const IMAGE_SIZE_OPTIONS: Record<string, { value: ImageSize; label: string }[]> = {
-    [CreativeType.IMAGEM_UNICA]: [
-        { value: '1:1', label: 'Quadrado (1:1)' },
-        { value: '4:5', label: 'Vertical (4:5)' },
-        { value: '9:16', label: 'Stories (9:16)' },
-    ],
-    [CreativeType.CARROSSEL]: [
-        { value: '1:1', label: 'Quadrado (1:1)' },
-        { value: '4:5', label: 'Vertical (4:5)' },
-    ],
-    [CreativeType.VIDEO_UGC]: [],
-    [CreativeType.MINI_VSL]: [],
-};
-
 
 export const NICHE_OPTIONS: string[] = [
   'Emagrecimento',

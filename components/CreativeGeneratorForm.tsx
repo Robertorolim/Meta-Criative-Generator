@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { CreativeType, ImageSize, AwarenessLevel, LanguageType } from '../types';
-import { CREATIVE_TYPE_OPTIONS, NICHE_OPTIONS, HOOK_OPTIONS_BY_AWARENESS, IMAGE_SIZE_OPTIONS, AWARENESS_LEVEL_OPTIONS, LANGUAGE_TYPE_OPTIONS } from '../constants';
+import React, { useEffect } from 'react';
+import { CreativeType, AwarenessLevel, LanguageType } from '../types';
+import { CREATIVE_TYPE_OPTIONS, NICHE_OPTIONS, HOOK_OPTIONS_BY_AWARENESS, AWARENESS_LEVEL_OPTIONS, LANGUAGE_TYPE_OPTIONS } from '../constants';
 import { SparklesIcon } from './icons/SparklesIcon';
 
 interface CreativeGeneratorFormProps {
@@ -22,16 +22,10 @@ interface CreativeGeneratorFormProps {
   setSelectedHook: (hook: string) => void;
   creativeType: CreativeType;
   setCreativeType: (type: CreativeType) => void;
-  imageSize: ImageSize;
-  setImageSize: (size: ImageSize) => void;
   isLoading: boolean;
   onGenerate: () => void;
   productDetailsHistory: string[];
   onSelectFromHistory: (details: string) => void;
-  carouselSlidesCount: number;
-  setCarouselSlidesCount: (count: number) => void;
-  productImageFile: File | null;
-  setProductImageFile: (file: File | null) => void;
 }
 
 const FormSection: React.FC<{ number: number; title: string; children: React.ReactNode }> = ({ number, title, children }) => (
@@ -65,27 +59,17 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
   setSelectedHook,
   creativeType,
   setCreativeType,
-  imageSize,
-  setImageSize,
   isLoading,
   onGenerate,
   productDetailsHistory,
   onSelectFromHistory,
-  carouselSlidesCount,
-  setCarouselSlidesCount,
-  productImageFile,
-  setProductImageFile,
 }) => {
-  const [productImagePreview, setProductImagePreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onGenerate();
   };
   
-  const isImageType = [CreativeType.IMAGEM_UNICA, CreativeType.CARROSSEL].includes(creativeType);
-  const sizeOptions = IMAGE_SIZE_OPTIONS[creativeType] || [];
   const selectedAwarenessDescription = AWARENESS_LEVEL_OPTIONS.find(opt => opt.value === awarenessLevel)?.description;
   const selectedLanguageDescription = LANGUAGE_TYPE_OPTIONS.find(opt => opt.value === languageType)?.description;
   
@@ -98,39 +82,6 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
         setSelectedHook(newHooks[0].value);
     }
   }, [awarenessLevel, setSelectedHook, selectedHook]);
-
-
-  useEffect(() => {
-    if (isImageType && sizeOptions.length > 0 && !sizeOptions.find(opt => opt.value === imageSize)) {
-        setImageSize(sizeOptions[0].value);
-    }
-  }, [creativeType, isImageType, sizeOptions, setImageSize, imageSize]);
-
-  useEffect(() => {
-    if (productImageFile) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setProductImagePreview(reader.result as string);
-        };
-        reader.readAsDataURL(productImageFile);
-    } else {
-        setProductImagePreview(null);
-    }
-  }, [productImageFile]);
-  
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setProductImageFile(file);
-    }
-  };
-
-  const removeProductImage = () => {
-      setProductImageFile(null);
-      if(fileInputRef.current) {
-          fileInputRef.current.value = "";
-      }
-  };
 
 
   return (
@@ -277,74 +228,18 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
         </FormSection>
         
         <FormSection number={7} title="Formato do Criativo">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <select
-                id="creativeType"
-                value={creativeType}
-                onChange={(e) => setCreativeType(e.target.value as CreativeType)}
-                className={`w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition ${!isImageType ? 'sm:col-span-2' : ''}`}
-                >
-                {CREATIVE_TYPE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value} className="bg-gray-800">
-                    {option.label}
-                    </option>
-                ))}
-                </select>
-            {isImageType && sizeOptions.length > 0 && (
-                    <select
-                        id="imageSize"
-                        value={imageSize}
-                        onChange={(e) => setImageSize(e.target.value as ImageSize)}
-                        className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
-                    >
-                        {sizeOptions.map((option) => (
-                            <option key={option.value} value={option.value} className="bg-gray-800">
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
-            )}
-            {creativeType === CreativeType.CARROSSEL && (
-                 <div className="sm:col-span-2">
-                     <label htmlFor="carouselSlides" className="block text-sm font-medium text-gray-300 mb-2">Nº de Slides do Carrossel</label>
-                     <input
-                        type="number"
-                        id="carouselSlides"
-                        value={carouselSlidesCount}
-                        onChange={(e) => setCarouselSlidesCount(parseInt(e.target.value, 10))}
-                        min="2"
-                        max="5"
-                        className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
-                     />
-                 </div>
-            )}
-            </div>
-             {isImageType && (
-                <div className="mt-4">
-                    <label htmlFor="productImage" className="block text-sm font-medium text-gray-300 mb-2">Imagem do Produto (Opcional)</label>
-                    <input
-                        type="file"
-                        id="productImage"
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                        accept="image/png, image/jpeg, image/webp"
-                        className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-500/20 file:text-sky-300 hover:file:bg-sky-500/30 transition"
-                    />
-                    {productImagePreview && (
-                        <div className="mt-4 relative w-32 h-32">
-                            <img src={productImagePreview} alt="Prévia do produto" className="rounded-lg object-cover w-full h-full" />
-                            <button
-                                type="button"
-                                onClick={removeProductImage}
-                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold"
-                                title="Remover Imagem"
-                            >
-                                &times;
-                            </button>
-                        </div>
-                    )}
-                </div>
-            )}
+          <select
+            id="creativeType"
+            value={creativeType}
+            onChange={(e) => setCreativeType(e.target.value as CreativeType)}
+            className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
+          >
+            {CREATIVE_TYPE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value} className="bg-gray-800">
+                {option.label}
+              </option>
+            ))}
+          </select>
         </FormSection>
 
 

@@ -1,8 +1,6 @@
 export enum CreativeType {
   VIDEO_UGC = 'Vídeo UGC (Reels/Stories)',
   MINI_VSL = 'Mini VSL (40 segundos)',
-  IMAGEM_UNICA = 'Imagem Única (Feed/Stories)',
-  CARROSSEL = 'Carrossel (Educativo/Oferta)',
 }
 
 export enum AwarenessLevel {
@@ -24,17 +22,8 @@ export enum LanguageType {
   STRUCTURED_CONVERSATIONAL = 'LINGUAGEM CONVERSACIONAL ESTRUTURADA',
 }
 
-export type ImageSize = '1:1' | '4:5' | '9:16';
-
-export interface CarouselSlide {
-  text: string;
-  imageUrl: string;
-}
-
 export interface GeneratedContent {
   text: string;
-  imageUrl: string | null;
-  carouselSlides?: CarouselSlide[];
 }
 
 export enum VoiceStyle {

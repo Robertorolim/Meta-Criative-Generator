@@ -1,6 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { ClipboardIcon } from './icons/ClipboardIcon';
-import { GeneratedContent, CreativeType, VoiceStyle, VoiceOption, CarouselSlide } from '../types';
+import { GeneratedContent, CreativeType, VoiceStyle, VoiceOption } from '../types';
 import { SparklesIcon } from './icons/SparklesIcon';
 
 // Lazy load the AudioGenerator component
@@ -20,22 +20,7 @@ interface CreativeDisplayProps {
   isVariationLoading: boolean;
 }
 
-const SkeletonLoader: React.FC<{ creativeType: CreativeType }> = ({ creativeType }) => {
-    const isImageType = [CreativeType.IMAGEM_UNICA, CreativeType.CARROSSEL].includes(creativeType);
-
-    if (isImageType) {
-        return (
-            <div className="space-y-6 animate-pulse">
-                <div className="w-full bg-white/10 rounded-lg aspect-square"></div>
-                <div className="space-y-3">
-                    <div className="h-4 bg-white/10 rounded w-1/3"></div>
-                    <div className="h-4 bg-white/10 rounded w-full"></div>
-                    <div className="h-4 bg-white/10 rounded w-5/6"></div>
-                </div>
-            </div>
-        );
-    }
-
+const SkeletonLoader: React.FC = () => {
     return (
         <div className="space-y-6 animate-pulse">
             <div className="space-y-3">
@@ -47,46 +32,6 @@ const SkeletonLoader: React.FC<{ creativeType: CreativeType }> = ({ creativeType
                 <div className="h-4 bg-white/10 rounded w-1/4"></div>
                 <div className="h-4 bg-white/10 rounded w-full"></div>
                 <div className="h-4 bg-white/10 rounded w-4/6"></div>
-            </div>
-        </div>
-    );
-};
-
-
-const CarouselSlideDisplay: React.FC<{ slide: CarouselSlide, index: number }> = ({ slide, index }) => {
-    const [copied, setCopied] = useState(false);
-
-    const handleCopy = () => {
-        navigator.clipboard.writeText(slide.text);
-        setCopied(true);
-    };
-
-    useEffect(() => {
-        if (copied) {
-            const timer = setTimeout(() => setCopied(false), 2000);
-            return () => clearTimeout(timer);
-        }
-    }, [copied]);
-
-    return (
-        <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-            <h3 className="font-bold text-sky-400 mb-3">Slide {index + 1}</h3>
-            <div className="space-y-4">
-                <img src={slide.imageUrl} alt={`Slide ${index + 1} do carrossel`} className="rounded-lg border-2 border-white/10 w-full" />
-                <div>
-                     <div className="flex justify-between items-center mb-2">
-                        <h4 className="text-md font-semibold text-gray-300">Texto do Slide</h4>
-                         <button
-                            onClick={handleCopy}
-                            className="flex items-center gap-2 text-xs bg-white/10 hover:bg-white/20 text-gray-300 font-medium py-1.5 px-2.5 rounded-lg transition-colors disabled:opacity-50"
-                            disabled={copied}
-                        >
-                            <ClipboardIcon />
-                            {copied ? 'Copiado!' : 'Copiar'}
-                        </button>
-                     </div>
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed bg-gray-900/50 p-3 rounded-lg">{slide.text}</p>
-                </div>
             </div>
         </div>
     );
@@ -105,18 +50,15 @@ export const CreativeDisplay: React.FC<CreativeDisplayProps> = ({
   isVariationLoading,
 }) => {
   const [copied, setCopied] = useState(false);
-  const isNarrationType = [CreativeType.VIDEO_UGC, CreativeType.MINI_VSL].includes(creativeType);
-  const copyButtonText = isNarrationType ? 'Copiar Narração' : 'Copiar Texto';
+  const copyButtonText = 'Copiar Narração';
   
   const handleCopy = () => {
     if (content?.text) {
         let textToCopy = content.text;
-        if (isNarrationType) {
-            // Clean visual cues and AIME tags for easier pasting
-            textToCopy = textToCopy.replace(/\([^)]*\)/g, "");
-            textToCopy = textToCopy.replace(/\[[A-Z]\]/g, '');
-            textToCopy = textToCopy.trim().replace(/\s+/g, ' ');
-        }
+        // Clean visual cues and AIME tags for easier pasting
+        textToCopy = textToCopy.replace(/\([^)]*\)/g, "");
+        textToCopy = textToCopy.replace(/\[[A-Z]\]/g, '');
+        textToCopy = textToCopy.trim().replace(/\s+/g, ' ');
         navigator.clipboard.writeText(textToCopy);
         setCopied(true);
     }
@@ -207,7 +149,7 @@ export const CreativeDisplay: React.FC<CreativeDisplayProps> = ({
 
   const renderContent = () => {
     if (isLoading) {
-      return <SkeletonLoader creativeType={creativeType} />;
+      return <SkeletonLoader />;
     }
 
     if (error) {
@@ -223,53 +165,30 @@ export const CreativeDisplay: React.FC<CreativeDisplayProps> = ({
         </div>
       );
     }
-
-    if (content.carouselSlides) {
-        return (
-            <div className="space-y-6">
-                {content.carouselSlides.map((slide, index) => (
-                    <CarouselSlideDisplay key={index} slide={slide} index={index} />
-                ))}
-            </div>
-        );
-    }
     
     return (
         <div className="space-y-6">
-            {content.imageUrl && (
-                <div>
-                    <img src={content.imageUrl} alt="Criativo gerado por IA" className="rounded-lg border-2 border-white/10 w-full" />
-                </div>
-            )}
-            
             <div className="space-y-4">
-                {content.text && !isNarrationType && (
-                     <div>
-                        <h3 className="text-lg font-semibold text-sky-300 mb-2">Sugestão de Texto para Imagem</h3>
-                        <p className="whitespace-pre-wrap leading-relaxed bg-white/5 p-4 rounded-lg">{content.text}</p>
-                    </div>
-                )}
-                {content.text && isNarrationType && renderNarrationContent(content.text)}
+                {content.text && renderNarrationContent(content.text)}
             </div>
 
             {content.text && (
                 <div className="pt-6 border-t border-white/10">
                     <button
                         onClick={() => onGenerateVariation(content.text!)}
-                        disabled={isVariationLoading || creativeType === CreativeType.CARROSSEL}
+                        disabled={isVariationLoading}
                         className="w-full flex items-center justify-center gap-2 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 font-bold py-2.5 px-4 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-indigo-500/40"
-                        title={creativeType === CreativeType.CARROSSEL ? "Variações não disponíveis para carrossel" : ""}
                     >
                         {isVariationLoading ? (
                             <>
                                 <svg className="animate-spin -ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 Criando Variação...
                             </>
-                        ) : `Gerar Variação ${isNarrationType ? 'do Roteiro' : 'do Texto'}`}
+                        ) : 'Gerar Variação do Roteiro'}
                     </button>
                 </div>
             )}
-            {isNarrationType && content.text && (
+            {content.text && (
                  <Suspense fallback={<div className="text-center p-8 text-gray-400">Carregando gerador de áudio...</div>}>
                     <AudioGenerator 
                         text={content.text}
@@ -288,7 +207,7 @@ export const CreativeDisplay: React.FC<CreativeDisplayProps> = ({
     <div className="p-6 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-lg shadow-2xl shadow-black/20 min-h-[500px]">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-indigo-400">Resultado</h2>
-        {content && content.text && !content.carouselSlides && !isLoading && !error && (
+        {content && content.text && !isLoading && !error && (
             <button
                 onClick={handleCopy}
                 className="flex items-center gap-2 text-sm bg-white/10 hover:bg-white/20 text-gray-300 font-medium py-2 px-3 rounded-lg transition-colors disabled:opacity-50"

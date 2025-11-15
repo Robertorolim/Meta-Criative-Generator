@@ -1,5 +1,5 @@
-import { GoogleGenAI, Modality, Type } from "@google/genai";
-import { CreativeType, ImageSize, GeneratedContent, VoiceStyle, VoiceOption, CarouselSlide, AwarenessLevel, LanguageType } from '../types';
+import { GoogleGenAI, Modality } from "@google/genai";
+import { CreativeType, GeneratedContent, VoiceStyle, VoiceOption, AwarenessLevel, LanguageType } from '../types';
 
 const getAwarenessLevelInstructions = (awarenessLevel: AwarenessLevel): string => {
     switch (awarenessLevel) {
@@ -153,8 +153,6 @@ const getPrompt = (
     languageType: LanguageType, 
     targetGender: string,
     targetAge: string,
-    imageSize: ImageSize, 
-    carouselSlidesCount: number
 ): string => {
   const awarenessInstructions = getAwarenessLevelInstructions(awarenessLevel);
   const languageInstructions = getLanguageTypeInstructions(languageType);
@@ -219,44 +217,6 @@ const getPrompt = (
       Para cada trecho da narração, adicione entre parênteses uma sugestão de visual (pode ser texto na tela, animações simples, ou cenas de banco de imagens). Exemplo: "[A] Você já se sentiu preso em um ciclo vicioso? (Texto 'Ciclo Vicioso' aparece na tela com um efeito de loop)".
       
       **IMPORTANTE:** Comece a resposta DIRETAMENTE com a primeira linha da narração, já com a marcação [A]. Não adicione nenhum texto introdutório, cabeçalho ou observação antes do roteiro.`;
-
-    case CreativeType.IMAGEM_UNICA:
-         return `
-            ${basePrompt}
-            **Sua Missão:** Gerar os componentes para um anúncio de imagem. Você deve fornecer:
-            1. A descrição para uma imagem de alto impacto (sem texto).
-            2. O texto (headline/copy) para ser colocado sobre essa imagem.
-            
-            **Diretrizes Específicas:**
-            *   **Descrição da Imagem:** Descreva uma imagem fotorrealista e de alta qualidade que traduza visualmente o conceito do gancho "${hook}". A imagem deve ser a representação visual do gancho.
-            *   **Texto para Imagem:** Crie um texto curto e poderoso que execute a estrutura do gancho "${hook}" de forma direta e concisa.
-
-            **Formato de Saída OBRIGATÓRIO:** Responda com um único objeto JSON, com a seguinte estrutura:
-            {
-              "image_description": "Sua descrição detalhada da imagem aqui, baseada no hook.",
-              "image_text": "Seu texto curto para a imagem aqui, aplicando o hook."
-            }
-        `;
-    case CreativeType.CARROSSEL:
-        return `
-            ${basePrompt}
-             **Sua Missão:** Gerar os componentes para um anúncio de carrossel com ${carouselSlidesCount} slides. Você deve fornecer:
-            1. Uma descrição para a imagem de CADA slide.
-            2. O texto (copy) para ser colocado sobre a imagem de CADA slide.
-
-            **Diretrizes Específicas:**
-            *   **Narrativa do Carrossel:** O carrossel deve contar uma micro-história ou apresentar um argumento progressivo. O primeiro slide DEVE aplicar o gancho "${hook}". Os slides seguintes devem desenvolver a ideia, respeitando o nível de consciência. O último slide deve ter uma chamada para ação clara.
-            *   **Descrição das Imagens:** Descreva imagens fotorrealistas que sigam a narrativa do carrossel.
-            *   **Textos dos Slides:** Crie textos curtos e impactantes para cada slide.
-
-            **Formato de Saída OBRIGATÓRIO:** Responda com um único objeto JSON, com a seguinte estrutura:
-            {
-              "slides": [
-                { "image_description": "Descrição para o slide 1, aplicando o hook '${hook}'.", "image_text": "Texto para o slide 1, aplicando o hook '${hook}'." },
-                { "image_description": "Descrição para o slide 2.", "image_text": "Texto para o slide 2." }
-              ]
-            }
-        `;
     default:
       return basePrompt;
   }
@@ -299,52 +259,8 @@ const getVariationPrompt = (niche: string, awarenessLevel: AwarenessLevel, creat
 
       **Formato de Saída:**
       - Para vídeos, retorne apenas o novo roteiro (narração e sugestões visuais). Se o original usava a estrutura A.I.M.E., a variação também deve usar. Comece diretamente com a primeira linha da narração.
-      - Para imagens ou carrosséis, retorne um único objeto JSON com a chave "image_text" (para imagem única) ou "slides" (para carrossel), contendo o(s) novo(s) texto(s).
     `;
 };
-
-const generateSingleImage = async (
-    ai: GoogleGenAI,
-    description: string,
-    imageSize: ImageSize,
-    productImageBase64: string | null,
-    productImageMimeType: string | null
-): Promise<string> => {
-    let imageGenPrompt: string;
-    const parts: any[] = [];
-
-    if (productImageBase64 && productImageMimeType) {
-        imageGenPrompt = `Integre a imagem do produto fornecida nesta cena, seguindo a descrição: "${description}". A integração deve ser 100% fotorrealista. **É crucial que o produto mantenha suas proporções e tamanho realistas.** Por exemplo, um frasco de gotas deve ter o tamanho de um frasco de gotas na vida real, não o tamanho de uma garrafa. A imagem final deve ter proporção ${imageSize} e qualidade de anúncio profissional.`;
-        parts.push({
-            inlineData: {
-                data: productImageBase64,
-                mimeType: productImageMimeType,
-            }
-        });
-        parts.push({ text: imageGenPrompt });
-    } else {
-        imageGenPrompt = `${description}. Proporção da imagem: ${imageSize}. Estilo fotorrealista, alta qualidade, sem nenhum texto.`;
-        parts.push({ text: imageGenPrompt });
-    }
-
-    const imageResponse = await ai.models.generateContent({
-        model: 'gemini-2.5-flash-image',
-        contents: { parts: parts },
-        config: {
-            responseModalities: [Modality.IMAGE],
-        },
-    });
-
-    const imagePart = imageResponse.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-
-    if (imagePart?.inlineData) {
-        const base64ImageBytes: string = imagePart.inlineData.data;
-        return `data:${imagePart.inlineData.mimeType};base64,${base64ImageBytes}`;
-    }
-
-    throw new Error("A geração da imagem falhou.");
-};
-
 
 export const generateCreative = async (
     niche: string, 
@@ -355,159 +271,33 @@ export const generateCreative = async (
     languageType: LanguageType,
     targetGender: string,
     targetAge: string,
-    imageSize: ImageSize,
-    carouselSlidesCount: number,
-    productImageBase64: string | null,
-    productImageMimeType: string | null
 ): Promise<GeneratedContent> => {
     if (!process.env.API_KEY) {
         throw new Error("API key is not configured.");
     }
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const prompt = getPrompt(niche, awarenessLevel, creativeType, productDetails, hook, languageType, targetGender, targetAge, imageSize, carouselSlidesCount);
+    const prompt = getPrompt(niche, awarenessLevel, creativeType, productDetails, hook, languageType, targetGender, targetAge);
     
-    if ([CreativeType.VIDEO_UGC, CreativeType.MINI_VSL].includes(creativeType)) {
-        const textResponse = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-        });
-
-        return { text: textResponse.text, imageUrl: null };
-    }
-
-    if(creativeType === CreativeType.CARROSSEL) {
-         const planResponse = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: Type.OBJECT,
-                    properties: {
-                        slides: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    image_description: { type: Type.STRING },
-                                    image_text: { type: Type.STRING },
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-        });
-        
-        let plan;
-        try {
-            plan = JSON.parse(planResponse.text.trim());
-        } catch {
-            throw new Error("A IA retornou um plano de carrossel inválido. Tente novamente.");
-        }
-        
-        if (!plan.slides || !Array.isArray(plan.slides)) {
-             throw new Error("A IA não conseguiu gerar o plano para o carrossel.");
-        }
-
-        const generatedSlides: CarouselSlide[] = await Promise.all(
-            plan.slides.map(async (slide: { image_description: string, image_text: string }, index: number) => {
-                // Only use the product image for the first slide (index 0) if it exists
-                const useProductImage = index === 0 && productImageBase64 && productImageMimeType;
-                const imageUrl = await generateSingleImage(
-                    ai, 
-                    slide.image_description, 
-                    imageSize, 
-                    useProductImage ? productImageBase64 : null, 
-                    useProductImage ? productImageMimeType : null
-                );
-                return { text: slide.image_text, imageUrl };
-            })
-        );
-        
-        return { text: '', imageUrl: null, carouselSlides: generatedSlides };
-    }
-
-
-    // Logic for single image types (IMAGEM_UNICA)
-    const planResponse = await ai.models.generateContent({
+    const textResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    image_description: { type: Type.STRING },
-                    image_text: { type: Type.STRING },
-                }
-            }
-        },
     });
 
-    const planText = planResponse.text.trim();
-    let plan;
-    try {
-        plan = JSON.parse(planText);
-    } catch {
-        throw new Error("A IA retornou um formato de plano inválido. Tente novamente.");
-    }
-
-    const { image_description, image_text } = plan;
-
-    if (!image_description || !image_text) {
-        throw new Error("A IA não conseguiu gerar o plano para a imagem.");
-    }
-
-    const imageUrl = await generateSingleImage(ai, image_description, imageSize, productImageBase64, productImageMimeType);
-
-    return { text: image_text, imageUrl };
+    return { text: textResponse.text };
 };
 
-export const generateCreativeVariation = async (niche: string, awarenessLevel: AwarenessLevel, creativeType: CreativeType, productDetails: string, hook: string, languageType: LanguageType, targetGender: string, targetAge: string, imageSize: ImageSize, originalText: string): Promise<string> => {
-    if (creativeType === CreativeType.CARROSSEL) {
-        throw new Error("A geração de variação não é suportada para o formato Carrossel.");
-    }
-
+export const generateCreativeVariation = async (niche: string, awarenessLevel: AwarenessLevel, creativeType: CreativeType, productDetails: string, hook: string, languageType: LanguageType, targetGender: string, targetAge: string, originalText: string): Promise<string> => {
     if (!process.env.API_KEY) {
         throw new Error("API key is not configured.");
     }
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = getVariationPrompt(niche, awarenessLevel, creativeType, productDetails, hook, languageType, targetGender, targetAge, originalText);
     
-    if ([CreativeType.VIDEO_UGC, CreativeType.MINI_VSL].includes(creativeType)) {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-        });
-        return response.text;
-    }
-
-    // For image types, we only need a new text
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    image_text: { type: Type.STRING },
-                }
-            }
-        },
     });
-    
-    const responseText = response.text.trim();
-    try {
-        const parsed = JSON.parse(responseText);
-        if (parsed.image_text) {
-            return parsed.image_text;
-        }
-        throw new Error("A resposta da IA não continha 'image_text'.");
-    } catch {
-        throw new Error("A IA retornou um formato de variação inválido. Tente novamente.");
-    }
+    return response.text;
 };
 
 
