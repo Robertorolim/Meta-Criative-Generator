@@ -22,8 +22,16 @@ export enum LanguageType {
   STRUCTURED_CONVERSATIONAL = 'LINGUAGEM CONVERSACIONAL ESTRUTURADA',
 }
 
+export interface ScriptSection {
+  section: 'A' | 'I' | 'M' | 'E';
+  narration: string;
+  visual_cue: string;
+}
+
 export interface GeneratedContent {
-  text: string;
+  structuredScript?: ScriptSection[]; // New structured format
+  rawText?: string; // Fallback/Legacy
+  imageUrl?: string; // For generated reference images
 }
 
 export enum VoiceStyle {

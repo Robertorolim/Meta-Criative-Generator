@@ -1,265 +1,58 @@
-import { GoogleGenAI, Modality } from "@google/genai";
-import { CreativeType, GeneratedContent, VoiceStyle, VoiceOption, AwarenessLevel, LanguageType } from '../types';
+import { GoogleGenAI, Modality, Type, Schema } from "@google/genai";
+import { CreativeType, GeneratedContent, VoiceStyle, VoiceOption, AwarenessLevel, LanguageType, ScriptSection } from '../types';
 
 const getAwarenessLevelInstructions = (awarenessLevel: AwarenessLevel): string => {
     switch (awarenessLevel) {
         case AwarenessLevel.UNCONSCIOUS:
-            return `
-**Diretriz de Nível de Consciência (Nível 1 — Inconsciente):**
-- **Objetivo:** Despertar a consciência do problema sem vender.
-- **Tom:** Intrigante, provocativo, misterioso.
-- **Estruturas de Gancho (Hooks):**
-    - **Padrão de Interrupção:** “Você se lembra de quem você era antes de [situação atual]?” (Ex: “Você se lembra de quem você era antes de desistir do seu corpo?”). Funciona para transformação pessoal, emagrecimento, carreira.
-    - **Estatística Chocante:** “[X]% das pessoas fazem [ação] sem saber que isso causa [consequência oculta]” (Ex: “87% das pessoas tomam café ao acordar sem saber que isso trava o metabolismo por 6h”). Funciona para saúde, finanças.
-    - **Revelação Silenciosa:** “Existe algo que ninguém te conta sobre [área]...” (Ex: “Existe algo que ninguém te conta sobre ganhar dinheiro online...”).
-    - **Comparação Temporal:** “[Área] era assim há 5 anos. Hoje é diferente. E você ainda está preso no passado.” (Ex: “Tráfego pago era assim há 5 anos...”).
-    - **Pergunta Existencial:** “Se você pudesse voltar [X anos], o que mudaria?” (Ex: “Se você pudesse voltar 10 anos, o que mudaria no seu corpo?”).
-    - **Observação Social:** “Repare nas pessoas ao seu redor. O que elas têm em comum?” (Ex: “Quantas estão realmente felizes com o próprio corpo?”).
-    - **Inversão de Realidade:** “E se eu te dissesse que [crena comum] é o oposto do que você deveria fazer?” (Ex: “Comer menos pode ser o oposto do ideal pra emagrecer.”).
-`;
+            return `**Nível 1 — Inconsciente:** Despertar consciência sem vender. Hooks: Padrão de Interrupção, Estatística Chocante, Inversão de Realidade.`;
         case AwarenessLevel.PROBLEM_AWARE:
-            return `
-**Diretriz de Nível de Consciência (Nível 2 — Consciente do Problema):**
-- **Objetivo:** Educar sobre a solução e desconstruir crenças antigas.
-- **Tom:** Educativo, revelador, consultivo.
-- **Estruturas de Gancho (Hooks):**
-    - **Causa Oculta:** “A verdadeira causa de [problema] não é [crença]. É [causa real].” (Ex: “Não é falta de força de vontade; é resistência à leptina.”).
-    - **Desconstrução:** “Por que [solução antiga] não funciona mais (e o que fazer agora)” (Ex: “Por que low-carb não funciona mais...”).
-    - **Ciclo Vicioso:** “Você tenta [ação], piora [problema]... o ciclo nunca acaba.” (Ex: “Dieta → desacelera metabolismo → tenta de novo → piora.”).
-    - **Revelação Progressiva:** “3 sinais de que [problema] está piorando (sem você perceber)” (Ex: “3 sinais de metabolismo travado.”).
-    - **Erro Comum:** “O erro que 90% comete ao tentar [resolver problema] (e como evitar)” (Ex: “O erro que 90% comete ao emagrecer.”).
-    - **Teste de Auto-Diagnóstico:** “Faça este teste: você tem [problema]?” (Ex: “Resistência à insulina?”).
-    - **Linha do Tempo:** “Semana 1: [sintoma]… Mês 6: [colapso]. Reconhece?” (Ex: cansaço → insônia → burnout).
-`;
+            return `**Nível 2 — Consciente do Problema:** Educar e desconstruir crenças. Hooks: Causa Oculta, Ciclo Vicioso, Erro Comum.`;
         case AwarenessLevel.SOLUTION_AWARE:
-            return `
-**Diretriz de Nível de Consciência (Nível 3 — Consciente da Solução):**
-- **Objetivo:** Provar diferenciação e quebrar objeções.
-- **Tom:** Confiante, factual, evidencial.
-- **Estruturas de Gancho (Hooks):**
-    - **Diferenciação Direta:** “A diferença entre [genérico] e [sua solução]: [diferencial]” (Ex: “Dieta comum × protocolo metabólico.”).
-    - **Prova Social Numérica:** “[Nome] conseguiu [resultado] em [tempo]. Veja como.” (Ex: “Maria perdeu 14kg em 8 semanas...”).
-    - **Objeção Antecipada:** “‘Mas [objeção]’ — é por isso que funciona.” (Ex: “Sem tempo pra academia.”).
-    - **Comparação Lado a Lado:** “[Método A] vs [seu método]. A escolha é sua.” (Ex: restritiva × protocolo metabólico).
-    - **Antes e Depois Emocional:** “Antes: [emoção ruim]. Depois: [emoção boa]. O que mudou?” (Ex: “Vergonha do biquíni” → “primeira a entrar no mar.”).
-    - **Autoridade por Associação:** “Mesmo método usado por [autoridade]” (Ex: “Protocolo de atletas olímpicos (adaptado).”).
-    - **Garantia Inversa:** “Se você não conseguir [resultado] em [prazo], eu [compromisso].” (Ex: “Devolvo em dobro.”).
-`;
+            return `**Nível 3 — Consciente da Solução:** Provar diferenciação. Hooks: Comparação Lado a Lado, Prova Social Numérica, Objeção Antecipada.`;
         case AwarenessLevel.PRODUCT_AWARE:
-            return `
-**Diretriz de Nível de Consciência (Nível 4 — Consciente do Produto):**
-- **Objetivo:** Criar urgência, facilitar decisão e remover último atrito.
-- **Tom:** Direto, urgente, facilitador.
-- **Estruturas de Gancho (Hooks):**
-    - **Escassez Real:** “[Número] vagas restantes. Depois, só em [data].”
-    - **Facilitação Extrema:** “3 cliques. 2 minutos. Você começa hoje.”
-    - **Custo de Oportunidade:** “Cada dia que você adia = [perda concreta].”
-    - **Bônus com Prazo:** “Entre hoje e ganhe [bônus]. Amanhã volta ao normal.”
-    - **Próximo Passo Óbvio:** “Você já sabe que precisa. Agora é só [ação simples].”
-    - **Comparação de Investimento:** “[Preço] ÷ [tempo] = menos que [comparação diária].” (Ex: “R$297 ÷ 90 dias = R$3,30/dia (menos que um café).”).
-    - **Deadline Emocional:** “Daqui a [prazo], você estará [estado futuro]. Onde?” (Ex: “Daqui a 3 meses é verão…”).
-`;
+            return `**Nível 4 — Consciente do Produto:** Urgência e facilitação. Hooks: Escassez Real, Facilitação Extrema, Deadline Emocional.`;
         case AwarenessLevel.ULTRA_AWARE:
-            return `
-**Diretriz de Nível de Consciência (Nível 5 — Ultra Consciente):**
-- **Objetivo:** Conversão imediata e remoção total de atrito.
-- **Tom:** Ultra direto, transacional.
-- **Estruturas de Gancho (Hooks):**
-    - **Acesso Imediato:** “Clique. Pague. Comece agora.”
-    - **Demonstração em Tempo Real:** “Veja funcionando em 60s [DEMO AO VIVO]”
-    - **Chamada Direta:** “Link na bio. Clique agora.”
-    - **Resultado Garantido:** “Comece hoje. Resultado em [prazo]. Ou dinheiro de volta.”
-`;
-        default:
-            return '';
+            return `**Nível 5 — Ultra Consciente:** Conversão imediata. Hooks: Acesso Imediato, Resultado Garantido.`;
+        default: return '';
     }
 };
 
 const getLanguageTypeInstructions = (languageType: LanguageType): string => {
-    switch (languageType) {
-        case LanguageType.SENSORIAL:
-            return `**Estilo de Linguagem: Sensorial (Imersiva)**
-- **Objetivo:** Fazer o público SENTIR antes de entender.
-- **Como usar:** Use palavras que evocam os 5 sentidos: cheiro, calor, peso, som, toque, contraste. Crie uma cena vívida na mente do leitor.
-- **Exemplo:** "Você acorda cansado, o despertador grita, e parece que o corpo pesa o dobro. Mas não é preguiça — é sinal de algo mais profundo."`;
-        case LanguageType.IDENTIFICATION:
-            return `**Estilo de Linguagem: Identificação (Espelho)**
-- **Objetivo:** Fazer o leitor pensar "esse sou eu!".
-- **Como usar:** Use as palavras e sentimentos exatos do seu público. Reflita as frustrações deles. Use frases como "Se você sente que...", "Bem-vindo ao clube dos que...".
-- **Exemplo:** "Se você sente que trabalha o dia todo e ainda assim o resultado nunca vem... bem-vindo ao clube dos que carregam o peso do mundo e recebem migalhas de retorno."`;
-        case LanguageType.MECHANISM:
-            return `**Estilo de Linguagem: Mecanismo (Autoridade + Revelação)**
-- **Objetivo:** Explicar de forma lógica por que nada funcionou antes e por que sua solução vai funcionar.
-- **Como usar:** Dê um nome ao problema ou à solução. Use palavras como: mecanismo, gatilho, processo, sistema, estrutura, fórmula. Apresente um "vilão" claro.
-- **Exemplo:** "O problema nunca foi sua disciplina — foi o ciclo de cortisol desregulado. E é exatamente isso que o método [nome] ajusta de forma natural."`;
-        case LanguageType.CONTRAST:
-            return `**Estilo de Linguagem: Contraste (Choque Controlado)**
-- **Objetivo:** Quebrar um padrão mental e despertar curiosidade.
-- **Como usar:** Apresente uma crença comum e depois a inverta. Use a estrutura "Você acha que X... mas na verdade é Y." ou "O maior erro não é X... é Y.".
-- **Exemplo:** "O erro mais caro que você comete todos os dias não custa dinheiro — custa energia mental."`;
-        case LanguageType.REVELATION:
-            return `**Estilo de Linguagem: Revelação (Confidencial)**
-- **Objetivo:** Soar como um insider, não como um vendedor.
-- **Como usar:** Adote um tom de "deixa eu te contar um segredo". Use frases como "O que ninguém te conta é...", "O segredo dos bastidores é...".
-- **Exemplo:** "Ninguém comenta isso, mas os profissionais que mais crescem fazem uma coisa em comum — e não tem nada a ver com sorte."`;
-        case LanguageType.STATUS:
-            return `**Estilo de Linguagem: Status (Transformacional)**
-- **Objetivo:** Focar na transformação de identidade e no "novo eu" que o produto entrega.
-- **Como usar:** Fale sobre sentimentos de poder, confiança, liberdade, reconhecimento e pertencimento. Vá além do benefício funcional.
-- **Exemplo:** "Não é sobre perder peso. É sobre entrar em qualquer sala e sentir que todos percebem sua presença."`;
-        case LanguageType.DECISION:
-            return `**Estilo de Linguagem: Decisão (Direta e Rápida)**
-- **Objetivo:** Dar o empurrão final para a ação, sem ruído.
-- **Como usar:** Seja direto, claro e imperativo. Remova adjetivos desnecessários. Foque no próximo passo simples.
-- **Exemplo:** "Clique e veja por dentro. Você vai entender em 20 segundos por que todos estão falando disso."`;
-        case LanguageType.STRUCTURED_CONVERSATIONAL:
-            return `**Estilo de Linguagem: Conversacional Estruturada (Natural e Persuasiva)**
-- **Objetivo:** Fazer o espectador sentir que está ouvindo uma conversa empática, não um vendedor.
-- **Como usar:** Combine estas 4 camadas:
-    1. **Tom de Orientação:** Use frases como "Deixa eu te explicar de um jeito simples." ou "Olha, talvez ninguém tenha te contado isso, mas...".
-    2. **Frases Curtas e Respiráveis:** Evite blocos longos. Uma ideia por frase. Crie ritmo com pausas.
-    3. **Vocabulário de Leitura Mental:** Use expressões que soam familiares e tocam em sensações universais (frustração, dúvida, esperança). Ex: "Sabe quando você sente que tá fazendo tudo certo, mas nada anda?".
-    4. **Analogias do Cotidiano:** Transforme conceitos complexos em imagens simples. Ex: "É como tentar encher um balde furado — não importa o quanto você trabalhe, tudo escapa.".
-- **IMPORTANTE:** A chamada para ação (CTA) no final do roteiro será fornecida em outra instrução. Você DEVE seguir a instrução de CTA específica, em vez de criar um "microconvite" genérico.`;
-        default:
-            return '';
+    return `**Estilo de Linguagem: ${languageType}**. Mantenha o tom estritamente alinhado a este estilo. Se for Sensorial, use os 5 sentidos. Se for Identificação, use espelhamento. Se for Conversacional, use frases curtas e naturais.`;
+};
+
+const getCTAInstructions = (awarenessLevel: AwarenessLevel, customCTA?: string): string => {
+    if (customCTA && customCTA.trim() !== "") {
+        return `CTA Rule: MANDATORY Use exactly this text for the 'E' (Evoke) section narration: "${customCTA}". Do not change it, do not translate it. Copy it exactly.`;
     }
+    // Simplified for JSON context
+    if (awarenessLevel === AwarenessLevel.UNCONSCIOUS) return "CTA Rule: CTA leve: engajamento ou seguir.";
+    if (awarenessLevel === AwarenessLevel.ULTRA_AWARE) return "CTA Rule: CTA agressiva: compra imediata.";
+    return "CTA Rule: CTA moderada: saber mais ou link na bio.";
 };
 
-const getCTAInstructions = (awarenessLevel: AwarenessLevel): string => {
-    switch (awarenessLevel) {
-        case AwarenessLevel.UNCONSCIOUS:
-            return "Termine com uma chamada para ação (CTA) extremamente leve e indireta, focada em engajamento e não em venda. Use variações. Exemplos: 'Me siga para descobrir mais sobre isso', 'Comente o que você acha', 'Toque aqui se isso fez sentido para você'.";
-        case AwarenessLevel.PROBLEM_AWARE:
-            return "Termine com uma CTA focada em aprofundar o conhecimento sobre o problema ou a categoria da solução. Use variações. Exemplos: 'Toque para descobrir os 3 erros mais comuns', 'Comente EU QUERO para receber um diagnóstico rápido', 'Siga para entender a verdadeira causa do problema'.";
-        case AwarenessLevel.SOLUTION_AWARE:
-            return "Termine com uma CTA que direcione para a prova ou diferenciação da sua solução. Use variações. Exemplos: 'Veja o passo a passo no link da bio', 'Toque para ver o estudo de caso completo', 'Acesse o link para comparar os métodos'.";
-        case AwarenessLevel.PRODUCT_AWARE:
-            return "Termine com uma CTA clara e direta, focada em facilitar a decisão e criar urgência. Use variações. Exemplos: 'Toque no link da bio para garantir sua vaga', 'Comece hoje clicando no link abaixo', 'Acesse o site para ver os bônus disponíveis só hoje'.";
-        case AwarenessLevel.ULTRA_AWARE:
-            return "Termine com uma CTA ultra direta e transacional, removendo qualquer atrito. Use variações. Exemplos: 'Clique no link da bio para comprar agora', 'Toque aqui para acesso imediato', 'Últimas unidades no link da bio'.";
-        default:
-            return "Termine com uma chamada para ação leve e apropriada para o nível de consciência.";
+
+const SCRIPT_SCHEMA: Schema = {
+    type: Type.ARRAY,
+    items: {
+        type: Type.OBJECT,
+        properties: {
+            section: {
+                type: Type.STRING,
+                enum: ["A", "I", "M", "E"],
+                description: "The A.I.M.E section identifier."
+            },
+            narration: {
+                type: Type.STRING,
+                description: "The spoken script for this section. First person (I/My) for UGC."
+            },
+            visual_cue: {
+                type: Type.STRING,
+                description: "Detailed visual description for the camera/scene."
+            }
+        },
+        required: ["section", "narration", "visual_cue"]
     }
-};
-
-
-const getPrompt = (
-    niche: string, 
-    awarenessLevel: AwarenessLevel, 
-    creativeType: CreativeType, 
-    productDetails: string, 
-    hook: string, 
-    languageType: LanguageType, 
-    targetGender: string,
-    targetAge: string,
-): string => {
-  const awarenessInstructions = getAwarenessLevelInstructions(awarenessLevel);
-  const languageInstructions = getLanguageTypeInstructions(languageType);
-  const ctaInstructions = getCTAInstructions(awarenessLevel);
-  const basePrompt = `
-    Você é um copywriter de elite e diretor de arte para Meta Ads, especialista no framework "Projeto Andrômeda". Sua missão é criar um criativo de anúncio perfeitamente calibrado para o público.
-
-    **Nicho do Cliente:** ${niche}
-    
-    **Público-Alvo:**
-    - **Gênero:** ${targetGender}
-    - **Idade:** ${targetAge || 'Não especificada.'}
-
-    **Nível de Consciência do Público:** ${awarenessLevel}
-    **Tipo de Linguagem:** ${languageType}
-    **Estrutura de Gancho (Hook) Selecionada:** "${hook}"
-    **Detalhes do Produto/Oferta:** ${productDetails || 'Não especificado.'}
-    **Tipo de Criativo:** ${creativeType}
-
-    **Diretriz Mestra:** O criativo DEVE ser construído em torno da **Estrutura de Gancho (Hook) Selecionada** e usar o **Tipo de Linguagem** especificado. A linguagem, os exemplos e o tom devem ser adaptados para ressoar especificamente com o público-alvo (gênero e idade) definido.
-
-    ${awarenessInstructions}
-
-    ${languageInstructions}
-
-    **Lembrete crítico (Anti-bloqueio Andromeda):**
-    1. **Foco Absoluto no Nível:** Nunca misture ganchos ou CTAs de níveis de consciência diferentes. O criativo deve ser 100% focado no nível de consciência selecionado.
-    2. **Sem Atributos Pessoais:** Não use "Você que...". Fale na primeira pessoa ou de forma impessoal.
-    3. **Processo > Promessa:** Mostre o "como", não apenas o "o quê". Evite promessas exageradas.
-    4. **Sem "Antes e Depois" Direto:** Foque na transformação emocional ou de processo.
-
-    **Tarefa:**
-  `;
-
-  switch (creativeType) {
-    case CreativeType.VIDEO_UGC:
-      return `${basePrompt}
-      Crie o roteiro completo (narração e sugestões visuais) para um vídeo de até 45 segundos. O tom deve ser autêntico. A narração DEVE ser em primeira pessoa (usando "eu", "meu", "senti", etc.) para criar uma conexão pessoal e autêntica, como se fosse um depoimento real.
-      
-      **Estrutura A.I.M.E. Obrigatória:**
-      O roteiro DEVE ser estruturado usando o framework A.I.M.E. e o gancho selecionado. Use as marcações [A], [I], [M], [E] para identificar cada seção:
-      - **[A] Awaken:** A provocação inicial. DEVE incorporar o gancho "${hook}".
-      - **[I] Inform:** Eduque sobre o problema de forma concisa.
-      - **[M] Mechanism:** Apresente o mecanismo único ou a causa real do problema.
-      - **[E] Evoke:** Evoque uma emoção e termine com uma chamada para ação (CTA). **A CTA DEVE seguir esta regra estrita:** ${ctaInstructions}
-
-      Para cada trecho da narração, adicione entre parênteses uma sugestão de imagem ou vídeo. Exemplo: "[A] Eu me lembro de quem eu era antes de desistir do meu corpo... (imagem minha, frustrado com o reflexo no espelho)".
-      
-      **IMPORTANTE:** Comece a resposta DIRETAMENTE com a primeira linha da narração, já com a marcação [A]. Não adicione nenhum texto introdutório, cabeçalho ou observação antes do roteiro.`;
-    
-    case CreativeType.MINI_VSL:
-      return `${basePrompt}
-      Crie o roteiro completo (narração e sugestões visuais) para uma Mini VSL de 40 segundos. O tom deve ser direto, persuasivo e focado na conversão.
-      
-      **Estrutura A.I.M.E. Obrigatória:**
-      O roteiro DEVE ser estruturado usando o framework A.I.M.E. e o gancho selecionado. Use as marcações [A], [I], [M], [E] para identificar cada seção:
-      - **[A] Awaken:** A provocação inicial. DEVE incorporar o gancho "${hook}". Seja rápido e direto.
-      - **[I] Inform:** Eduque sobre o problema, agitando a dor de forma concisa.
-      - **[M] Mechanism:** Apresente o mecanismo único ou a solução de forma clara e como a grande novidade.
-      - **[E] Evoke:** Evoque o desejo pela solução e termine com uma chamada para ação (CTA) clara e direta. **A CTA DEVE seguir esta regra estrita:** ${ctaInstructions}
-
-      Para cada trecho da narração, adicione entre parênteses uma sugestão de visual (pode ser texto na tela, animações simples, ou cenas de banco de imagens). Exemplo: "[A] Você já se sentiu preso em um ciclo vicioso? (Texto 'Ciclo Vicioso' aparece na tela com um efeito de loop)".
-      
-      **IMPORTANTE:** Comece a resposta DIRETAMENTE com a primeira linha da narração, já com a marcação [A]. Não adicione nenhum texto introdutório, cabeçalho ou observação antes do roteiro.`;
-    default:
-      return basePrompt;
-  }
-};
-
-const getVariationPrompt = (niche: string, awarenessLevel: AwarenessLevel, creativeType: CreativeType, productDetails: string, hook: string, languageType: LanguageType, targetGender: string, targetAge: string, originalText: string): string => {
-    const awarenessInstructions = getAwarenessLevelInstructions(awarenessLevel);
-    const languageInstructions = getLanguageTypeInstructions(languageType);
-    return `
-      Você é um copywriter de elite especialista no framework "Projeto Andrômeda".
-      Sua tarefa é criar uma VARIAÇÃO de um texto de anúncio, mantendo o mesmo nicho, oferta, nível de consciência e, mais importante, a mesma ESTRUTURA DE GANCHO e TIPO DE LINGUAGEM.
-
-      **Nicho:** ${niche}
-      
-      **Público-Alvo:**
-      - **Gênero:** ${targetGender}
-      - **Idade:** ${targetAge || 'Não especificada.'}
-
-      **Nível de Consciência:** ${awarenessLevel}
-      **Detalhes da Oferta:** ${productDetails || 'Não especificado.'}
-      **Tipo de Criativo:** ${creativeType}
-      **Estrutura de Gancho (Hook) a ser mantida:** "${hook}"
-      **Tipo de Linguagem a ser mantida:** ${languageType}
-
-      **Instrução Adicional:** A linguagem, os exemplos e o tom da variação devem continuar adaptados para ressoar com o público-alvo (gênero e idade) definido.
-
-      **Diretrizes do Nível de Consciência (para referência):**
-      ${awarenessInstructions}
-
-      **Diretrizes do Tipo de Linguagem (para referência):**
-      ${languageInstructions}
-
-      **Texto Original para ser variado:**
-      ---
-      ${originalText}
-      ---
-      
-      **Sua Tarefa:**
-      Crie uma nova versão do texto que AINDA utilize a estrutura de gancho "${hook}" e o tipo de linguagem "${languageType}", mas com uma abordagem, ângulo ou exemplo diferente. Seja criativo, mas não mude os fundamentos.
-
-      **Formato de Saída:**
-      - Para vídeos, retorne apenas o novo roteiro (narração e sugestões visuais). Se o original usava a estrutura A.I.M.E., a variação também deve usar. Comece diretamente com a primeira linha da narração.
-    `;
 };
 
 export const generateCreative = async (
@@ -271,37 +64,106 @@ export const generateCreative = async (
     languageType: LanguageType,
     targetGender: string,
     targetAge: string,
+    customCTA?: string,
 ): Promise<GeneratedContent> => {
     if (!process.env.API_KEY) {
         throw new Error("API key is not configured.");
     }
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const prompt = getPrompt(niche, awarenessLevel, creativeType, productDetails, hook, languageType, targetGender, targetAge);
-    
-    const textResponse = await ai.models.generateContent({
+
+    const systemInstruction = `
+You are an elite copywriter for Meta Ads (Andromeda Framework).
+Your task is to generate a structured ad script in JSON format.
+
+Target Audience: ${targetGender}, ${targetAge || 'General'}.
+Niche: ${niche}.
+Awareness: ${awarenessLevel}.
+Language: ${languageType}.
+Hook: "${hook}".
+Product: ${productDetails}.
+Format: ${creativeType}.
+
+${getAwarenessLevelInstructions(awarenessLevel)}
+${getLanguageTypeInstructions(languageType)}
+${getCTAInstructions(awarenessLevel, customCTA)}
+
+Framework A.I.M.E. is MANDATORY:
+- A (Awaken): The Hook.
+- I (Inform): Agitate problem/context.
+- M (Mechanism): The solution/method.
+- E (Evoke): Emotion + Call to Action.
+
+Output must be a JSON array of objects with keys: section, narration, visual_cue.
+`;
+
+    const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: prompt,
+        contents: "Generate the creative script now.",
+        config: {
+            systemInstruction: systemInstruction,
+            responseMimeType: "application/json",
+            responseSchema: SCRIPT_SCHEMA,
+            temperature: 0.7, 
+        },
     });
 
-    return { text: textResponse.text };
+    if (response.text) {
+        try {
+            const structuredScript = JSON.parse(response.text) as ScriptSection[];
+            return { structuredScript };
+        } catch (e) {
+            console.error("JSON Parse error", e);
+            return { rawText: response.text }; // Fallback
+        }
+    }
+    throw new Error("No content generated");
 };
 
-export const generateCreativeVariation = async (niche: string, awarenessLevel: AwarenessLevel, creativeType: CreativeType, productDetails: string, hook: string, languageType: LanguageType, targetGender: string, targetAge: string, originalText: string): Promise<string> => {
+export const generateCreativeVariation = async (
+    niche: string, 
+    awarenessLevel: AwarenessLevel, 
+    creativeType: CreativeType, 
+    productDetails: string, 
+    hook: string, 
+    languageType: LanguageType, 
+    targetGender: string, 
+    targetAge: string, 
+    originalText: string,
+    customCTA?: string
+): Promise<GeneratedContent> => {
+     // We pass the customCTA to ensure the variation respects the user's edit
+     return generateCreative(niche, awarenessLevel, creativeType, productDetails, hook, languageType, targetGender, targetAge, customCTA);
+};
+
+export const generateReferenceImage = async (prompt: string): Promise<string> => {
     if (!process.env.API_KEY) {
         throw new Error("API key is not configured.");
     }
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const prompt = getVariationPrompt(niche, awarenessLevel, creativeType, productDetails, hook, languageType, targetGender, targetAge, originalText);
-    
+
+    const improvedPrompt = `Cinematic photography, vertical 9:16 aspect ratio, high quality, advertising style. ${prompt}`;
+
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
+        model: 'gemini-2.5-flash-image',
+        contents: improvedPrompt,
+        config: {
+           // responseMimeType not supported for image gen on this model in this way, it returns parts
+        }
     });
-    return response.text;
+
+    if (response.candidates && response.candidates[0].content.parts) {
+        for (const part of response.candidates[0].content.parts) {
+            if (part.inlineData && part.inlineData.data) {
+                return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+            }
+        }
+    }
+    
+    throw new Error("Failed to generate image");
 };
 
 
-// Helper to decode base64
+// Audio Helpers
 function decode(base64: string) {
     const binaryString = atob(base64);
     const len = binaryString.length;
@@ -312,7 +174,6 @@ function decode(base64: string) {
     return bytes;
 }
 
-// Helper to create a WAV file from raw PCM data
 function createWavBlobFromPcm(base64Pcm: string): Blob {
     const pcmData = decode(base64Pcm);
     const sampleRate = 24000;
@@ -323,26 +184,18 @@ function createWavBlobFromPcm(base64Pcm: string): Blob {
     const buffer = new ArrayBuffer(headerSize + pcmData.length);
     const view = new DataView(buffer);
 
-    // RIFF header
-    view.setUint32(0, 0x52494646, false); // "RIFF"
+    view.setUint32(0, 0x52494646, false); 
     view.setUint32(4, 36 + pcmData.length, true);
-    view.setUint32(8, 0x57415645, false); // "WAVE"
-    
-    // "fmt " sub-chunk
-    view.setUint32(12, 0x666d7420, false); // "fmt "
-    view.setUint32(16, 16, true); // Sub-chunk size (16 for PCM)
-    view.setUint16(20, 1, true); // Audio format (1 for PCM)
+    view.setUint32(8, 0x57415645, false); 
+    view.setUint32(12, 0x666d7420, false); 
+    view.setUint16(20, 1, true); 
     view.setUint16(22, numChannels, true);
     view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate * numChannels * (bitsPerSample / 8), true); // Byte rate
-    view.setUint16(32, numChannels * (bitsPerSample / 8), true); // Block align
+    view.setUint32(28, sampleRate * numChannels * (bitsPerSample / 8), true); 
+    view.setUint16(32, numChannels * (bitsPerSample / 8), true); 
     view.setUint16(34, bitsPerSample, true);
-
-    // "data" sub-chunk
-    view.setUint32(36, 0x64617461, false); // "data"
+    view.setUint32(36, 0x64617461, false); 
     view.setUint32(40, pcmData.length, true);
-
-    // Copy PCM data
     new Uint8Array(buffer, headerSize).set(pcmData);
 
     return new Blob([buffer], { type: 'audio/wav' });
@@ -350,26 +203,20 @@ function createWavBlobFromPcm(base64Pcm: string): Blob {
 
 const getStyleInstruction = (style: VoiceStyle): string => {
     switch (style) {
-        case VoiceStyle.ENTHUSIASTIC:
-            return 'Gere o áudio a seguir com um tom entusiasmado, energético e persuasivo, com um ritmo mais rápido e dinâmico para criar excitação.';
-        case VoiceStyle.CALM:
-            return 'Gere o áudio a seguir com um tom calmo, claro e confiante, com um ritmo moderado para transmitir segurança e credibilidade.';
-        case VoiceStyle.PROFESSIONAL:
-            return 'Gere o áudio a seguir com um tom profissional, formal e direto, com um ritmo firme e claro para focar na objetividade e autoridade.';
-        case VoiceStyle.EMPATHETIC:
-            return 'Gere o áudio a seguir com um tom empático, acolhedor e genuíno, como se estivesse conversando com um amigo, para criar conexão.';
-        case VoiceStyle.NARRATIVE:
-            return 'Gere o áudio a seguir com um tom emocional e envolvente, com ritmo e entonação variáveis para refletir os momentos da história.';
-        default:
-            return '';
+        case VoiceStyle.ENTHUSIASTIC: return 'Tom entusiasmado, energético e persuasivo.';
+        case VoiceStyle.CALM: return 'Tom calmo, claro e confiante.';
+        case VoiceStyle.PROFESSIONAL: return 'Tom profissional, formal e direto.';
+        case VoiceStyle.EMPATHETIC: return 'Tom empático, acolhedor e genuíno.';
+        case VoiceStyle.NARRATIVE: return 'Tom emocional e envolvente de storytelling.';
+        default: return '';
     }
 }
 
 const getStyleHintInstruction = (hint?: VoiceOption['styleHint']): string => {
     switch (hint) {
-        case 'calm': return 'Fale de forma especialmente calma, clara e confiante.';
-        case 'energetic': return 'Fale com mais energia, entusiasmo e um tom um pouco mais agudo.';
-        case 'friendly': return 'Use um tom mais amigável, pessoal e conversacional, como se estivesse falando com um amigo.';
+        case 'calm': return 'Fale de forma especialmente calma.';
+        case 'energetic': return 'Fale com mais energia.';
+        case 'friendly': return 'Use um tom amigável.';
         default: return '';
     }
 }
@@ -379,29 +226,11 @@ export const generateAudio = async (text: string, voiceName: string, voiceStyle:
         throw new Error("API key is not configured.");
     }
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
     const styleInstruction = getStyleInstruction(voiceStyle);
     const hintInstruction = getStyleHintInstruction(styleHint);
     
-    let narrationOnly = text;
-
-    // Step 1: Remove AIME tags like [A], [I], etc.
-    narrationOnly = narrationOnly.replace(/\[[A-Z]\]/g, '');
-
-    // Step 2: Remove visual cues in parentheses (e.g., "(Vídeo da pessoa...)")
-    narrationOnly = narrationOnly.replace(/\([^)]+\)/g, "");
-    
-    // Step 3: Remove any markdown characters.
-    narrationOnly = narrationOnly.replace(/[\*_`#]/g, "");
-
-    // Step 4: Trim and consolidate whitespace into single spaces for a clean input.
-    narrationOnly = narrationOnly.trim().replace(/\s+/g, ' ');
-
-    if (!narrationOnly) {
-        throw new Error("Não foi encontrado texto narrável para gerar o áudio.");
-    }
-
-    const textForTTS = `${styleInstruction} ${hintInstruction}\n\n${narrationOnly}`; 
+    // Text is assumed to be cleaned narration at this point
+    const textForTTS = `${styleInstruction} ${hintInstruction}\n\n${text}`; 
 
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-preview-tts",
@@ -416,20 +245,11 @@ export const generateAudio = async (text: string, voiceName: string, voiceStyle:
         },
     });
     
-    // Check for block reasons
-    if (response.candidates?.[0]?.finishReason && response.candidates[0].finishReason !== 'STOP') {
-        const reason = response.candidates[0].finishReason;
-        const message = `A geração de áudio foi bloqueada. Motivo: ${reason}. Isso pode ocorrer por políticas de segurança do conteúdo.`;
-        throw new Error(message);
-    }
-    
     const audioPart = response.candidates?.[0]?.content?.parts?.[0];
-
     if (audioPart?.inlineData?.data) {
-        const base64Audio = audioPart.inlineData.data;
-        const wavBlob = createWavBlobFromPcm(base64Audio);
+        const wavBlob = createWavBlobFromPcm(audioPart.inlineData.data);
         return URL.createObjectURL(wavBlob);
     }
 
-    throw new Error("A geração do áudio falhou. A resposta da API não continha dados de áudio válidos.");
+    throw new Error("A geração do áudio falhou.");
 };
