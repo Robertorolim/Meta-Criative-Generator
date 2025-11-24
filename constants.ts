@@ -1,4 +1,5 @@
-import { CreativeType, VoiceStyle, VoiceOption, AwarenessLevel, LanguageType } from './types';
+
+import { CreativeType, VoiceStyle, VoiceOption, AwarenessLevel, LanguageType, TargetGender } from './types';
 
 export const CREATIVE_TYPE_OPTIONS: { value: CreativeType; label: string }[] = [
   { value: CreativeType.VIDEO_UGC, label: 'Vídeo UGC (Reels/Stories)' },
@@ -19,48 +20,78 @@ export const NICHE_OPTIONS: string[] = [
   'Outro',
 ];
 
+export const CTA_OPTIONS: string[] = [
+    'Clique em Saiba Mais',
+    'Clique no botão abaixo',
+    'Acesse o Link na Bio',
+    'Comente "EU QUERO"',
+    'Envie um Direct',
+    'Inscreva-se Agora',
+    'Garanta sua Vaga',
+    'Compre Agora',
+    'Compartilhe esse vídeo',
+    'Salve para ver depois',
+    'Outro (Personalizado)'
+];
+
+export const GENDER_OPTIONS: { value: TargetGender; label: string }[] = [
+    { value: TargetGender.BOTH, label: 'Ambos / Unissex' },
+    { value: TargetGender.FEMALE, label: 'Feminino' },
+    { value: TargetGender.MALE, label: 'Masculino' },
+];
+
+export const AGE_OPTIONS: string[] = [
+    '18-24 anos (Gen Z)',
+    '25-34 anos (Jovens Adultos)',
+    '35-44 anos (Adultos)',
+    '45-54 anos (Meia Idade)',
+    '55-64 anos (Seniores)',
+    '65+ anos',
+    'Todas as idades',
+];
+
 export const HOOK_OPTIONS_BY_AWARENESS: Record<AwarenessLevel, { value: string; label: string }[]> = {
   [AwarenessLevel.UNCONSCIOUS]: [
-    { value: 'Padrão de Interrupção', label: 'Padrão de Interrupção' },
-    { value: 'Estatística Chocante', label: 'Estatística Chocante' },
-    { value: 'Revelação Silenciosa', label: 'Revelação Silenciosa' },
-    { value: 'Comparação Temporal', label: 'Comparação Temporal' },
-    { value: 'Pergunta Existencial', label: 'Pergunta Existencial' },
-    { value: 'Observação Social', label: 'Observação Social' },
-    { value: 'Inversão de Realidade', label: 'Inversão de Realidade' },
+    { value: 'Padrão de Interrupção', label: '#1 Padrão de Interrupção' },
+    { value: 'Estatística Chocante', label: '#2 Estatística Chocante' },
+    { value: 'Revelação Silenciosa', label: '#3 Revelação Silenciosa' },
+    { value: 'Comparação Temporal', label: '#4 Comparação Temporal' },
+    { value: 'Pergunta Existencial', label: '#5 Pergunta Existencial' },
+    { value: 'Observação Social', label: '#6 Observação Social' },
+    { value: 'Inversão de Realidade', label: '#7 Inversão de Realidade' },
   ],
   [AwarenessLevel.PROBLEM_AWARE]: [
-    { value: 'Causa Oculta', label: 'Causa Oculta' },
-    { value: 'Desconstrução', label: 'Desconstrução' },
-    { value: 'Ciclo Vicioso', label: 'Ciclo Vicioso' },
-    { value: 'Revelação Progressiva', label: 'Revelação Progressiva' },
-    { value: 'Erro Comum', label: 'Erro Comum' },
-    { value: 'Teste de Auto-Diagnóstico', label: 'Teste de Auto-Diagnóstico' },
-    { value: 'Linha do Tempo', label: 'Linha do Tempo' },
+    { value: 'Causa Oculta', label: '#8 Causa Oculta' },
+    { value: 'Desconstrução', label: '#9 Desconstrução' },
+    { value: 'Ciclo Vicioso', label: '#10 Ciclo Vicioso' },
+    { value: 'Revelação Progressiva', label: '#11 Revelação Progressiva' },
+    { value: 'Erro Comum', label: '#12 Erro Comum' },
+    { value: 'Teste de Auto-Diagnóstico', label: '#13 Teste de Auto-Diagnóstico' },
+    { value: 'Linha do Tempo', label: '#14 Linha do Tempo' },
   ],
   [AwarenessLevel.SOLUTION_AWARE]: [
-    { value: 'Diferenciação Direta', label: 'Diferenciação Direta' },
-    { value: 'Prova Social Numérica', label: 'Prova Social Numérica' },
-    { value: 'Objeção Antecipada', label: 'Objeção Antecipada' },
-    { value: 'Comparação Lado a Lado', label: 'Comparação Lado a Lado' },
-    { value: 'Antes e Depois Emocional', label: 'Antes e Depois Emocional' },
-    { value: 'Autoridade por Associação', label: 'Autoridade por Associação' },
-    { value: 'Garantia Inversa', label: 'Garantia Inversa' },
+    { value: 'Diferenciação Direta', label: '#15 Diferenciação Direta' },
+    { value: 'Prova Social Numérica', label: '#16 Prova Social Numérica' },
+    { value: 'Objeção Antecipada', label: '#17 Objeção Antecipada' },
+    { value: 'Comparação Lado a Lado', label: '#18 Comparação Lado a Lado' },
+    { value: 'Antes e Depois Emocional', label: '#19 Antes e Depois Emocional' },
+    { value: 'Autoridade por Associação', label: '#20 Autoridade por Associação' },
+    { value: 'Garantia Inversa', label: '#21 Garantia Inversa' },
   ],
   [AwarenessLevel.PRODUCT_AWARE]: [
-    { value: 'Escassez Real', label: 'Escassez Real' },
-    { value: 'Facilitação Extrema', label: 'Facilitação Extrema' },
-    { value: 'Custo de Oportunidade', label: 'Custo de Oportunidade' },
-    { value: 'Bônus com Prazo', label: 'Bônus com Prazo' },
-    { value: 'Próximo Passo Óbvio', label: 'Próximo Passo Óbvio' },
-    { value: 'Comparação de Investimento', label: 'Comparação de Investimento' },
-    { value: 'Deadline Emocional', label: 'Deadline Emocional' },
+    { value: 'Escassez Real', label: '#22 Escassez Real' },
+    { value: 'Facilitação Extrema', label: '#23 Facilitação Extrema' },
+    { value: 'Custo de Oportunidade', label: '#24 Custo de Oportunidade' },
+    { value: 'Bônus com Prazo', label: '#25 Bônus com Prazo' },
+    { value: 'Próximo Passo Óbvio', label: '#26 Próximo Passo Óbvio' },
+    { value: 'Comparação de Investimento', label: '#27 Comparação de Investimento' },
+    { value: 'Deadline Emocional', label: '#28 Deadline Emocional' },
   ],
   [AwarenessLevel.ULTRA_AWARE]: [
-    { value: 'Acesso Imediato', label: 'Acesso Imediato' },
-    { value: 'Demonstração em Tempo Real', label: 'Demonstração em Tempo Real' },
-    { value: 'Chamada Direta', label: 'Chamada Direta' },
-    { value: 'Resultado Garantido', label: 'Resultado Garantido' },
+    { value: 'Acesso Imediato', label: '#29 Acesso Imediato' },
+    { value: 'Demonstração em Tempo Real', label: '#30 Demonstração em Tempo Real' },
+    { value: 'Chamada Direta', label: '#31 Chamada Direta' },
+    { value: 'Resultado Garantido', label: '#32 Resultado Garantido' },
   ],
 };
 
@@ -73,8 +104,6 @@ export const VOICE_STYLE_OPTIONS: { value: VoiceStyle; label: string }[] = [
     { value: VoiceStyle.NARRATIVE, label: 'Narrativo/Contação de Histórias' },
 ];
 
-// Lista de vozes revisada e organizada, usando vozes oficiais do Gemini para garantir compatibilidade e gênero correto.
-// Adicionadas variações de estilo para as vozes mais versáteis (Kore e Zephyr) para obter resultados mais humanizados e menos robóticos.
 const femaleVoices: VoiceOption[] = [
     { name: 'Kore - Amigável e Conversacional', apiName: 'Kore', gender: 'female', styleHint: 'friendly' },
     { name: 'Kore - Calma e Clara', apiName: 'Kore', gender: 'female', styleHint: 'calm' },
@@ -99,28 +128,28 @@ export const VOICE_OPTIONS: VoiceOption[] = [
 export const AWARENESS_LEVEL_OPTIONS: { value: AwarenessLevel; label: string; description: string }[] = [
     {
         value: AwarenessLevel.UNCONSCIOUS,
-        label: 'Inconsciente',
-        description: 'Objetivo: despertar consciência do problema sem vender. Tom: intrigante, provocativo, misterioso. Formato ideal: Reels curtos (7–15s), Stories.',
+        label: 'Nível 1: Inconsciente',
+        description: 'Objetivo: Despertar consciência do problema sem vender. Tom: Intrigante, provocativo, misterioso. Formato: Reels curtos (7-15s), Stories.',
     },
     {
         value: AwarenessLevel.PROBLEM_AWARE,
-        label: 'Consciente do Problema',
-        description: 'Objetivo: educar sobre a solução e desconstruir crenças antigas. Tom: educativo, revelador, consultivo. Formato ideal: carrossel educativo, Reels 15–30s.',
+        label: 'Nível 2: Consciente do Problema',
+        description: 'Objetivo: Educar sobre solução + desconstruir crenças. Tom: Educativo, revelador, consultivo. Formato: Carrossel educativo, Reels 15-30s.',
     },
     {
         value: AwarenessLevel.SOLUTION_AWARE,
-        label: 'Consciente da Solução',
-        description: 'Objetivo: provar diferenciação e quebrar objeções. Tom: confiante, factual, evidencial. Formato ideal: cases, depoimentos, comparações, UGC.',
+        label: 'Nível 3: Consciente da Solução',
+        description: 'Objetivo: Provar diferenciação + quebrar objeções. Tom: Confiante, factual, baseado em evidências. Formato: Cases, depoimentos, comparações.',
     },
     {
         value: AwarenessLevel.PRODUCT_AWARE,
-        label: 'Consciente do Produto',
-        description: 'Objetivo: criar urgência, facilitar decisão e remover último atrito. Tom: direto, urgente, facilitador. Formato ideal: Stories com swipe up, Reels com CTA direto.',
+        label: 'Nível 4: Consciente do Produto',
+        description: 'Objetivo: Criar urgência + facilitar decisão. Tom: Direto, urgente, facilitador. Formato: Stories swipe up, Reels CTA direto.',
     },
     {
         value: AwarenessLevel.ULTRA_AWARE,
-        label: 'Ultra Consciente',
-        description: 'Objetivo: conversão imediata e remoção total de atrito. Tom: ultra direto, transacional. Formato ideal: Stories com link, Reels com um único CTA.',
+        label: 'Nível 5: Ultra Consciente',
+        description: 'Objetivo: Conversão imediata + remoção de atrito. Tom: Ultra direto, transacional. Formato: Link direto, "Clique agora".',
     }
 ];
 
@@ -159,10 +188,5 @@ export const LANGUAGE_TYPE_OPTIONS: { value: LanguageType; label: string; descri
         value: LanguageType.DECISION,
         label: '⏳ 7. Decisão (Direta)',
         description: 'Uso: Ultra Aware / Urgência. Objetivo: Dar o empurrão final. Exemplo: “Clique e veja por dentro. Você vai entender em 20 segundos por que todos estão falando disso.” Curta, imperativa, sem adjetivos exagerados. Função: Gatilho de ação, fecha o ciclo.',
-    },
-    {
-        value: LanguageType.STRUCTURED_CONVERSATIONAL,
-        label: '🗣️ 8. Conversacional (Estruturada)',
-        description: 'Objetivo: Fazer o espectador sentir que está ouvindo uma conversa, não um vendedor. Ideal para Mini VSLs, Reels e UGC. Combina um tom de orientação, frases curtas, vocabulário familiar e analogias do cotidiano. A chamada para ação (CTA) no final será sempre alinhada com o nível de consciência Andrômeda selecionado.',
     }
 ];

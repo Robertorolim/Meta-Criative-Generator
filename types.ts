@@ -1,3 +1,4 @@
+
 export enum CreativeType {
   VIDEO_UGC = 'Vídeo UGC (Reels/Stories)',
   MINI_VSL = 'Mini VSL (40 segundos)',
@@ -19,19 +20,16 @@ export enum LanguageType {
   REVELATION = 'LINGUAGEM DE REVELAÇÃO (Confidencial)',
   STATUS = 'LINGUAGEM DE STATUS (Transformacional)',
   DECISION = 'LINGUAGEM DE DECISÃO (Direta, Rápida, Sem Ruído)',
-  STRUCTURED_CONVERSATIONAL = 'LINGUAGEM CONVERSACIONAL ESTRUTURADA',
 }
 
-export interface ScriptSection {
-  section: 'A' | 'I' | 'M' | 'E';
-  narration: string;
-  visual_cue: string;
+export enum TargetGender {
+  MALE = 'Masculino',
+  FEMALE = 'Feminino',
+  BOTH = 'Ambos / Unissex',
 }
 
 export interface GeneratedContent {
-  structuredScript?: ScriptSection[]; // New structured format
-  rawText?: string; // Fallback/Legacy
-  imageUrl?: string; // For generated reference images
+  text: string;
 }
 
 export enum VoiceStyle {

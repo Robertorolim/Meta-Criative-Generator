@@ -1,6 +1,7 @@
+
 import React, { useEffect } from 'react';
-import { CreativeType, AwarenessLevel, LanguageType } from '../types';
-import { CREATIVE_TYPE_OPTIONS, NICHE_OPTIONS, HOOK_OPTIONS_BY_AWARENESS, AWARENESS_LEVEL_OPTIONS, LANGUAGE_TYPE_OPTIONS } from '../constants';
+import { CreativeType, AwarenessLevel, LanguageType, TargetGender } from '../types';
+import { CREATIVE_TYPE_OPTIONS, NICHE_OPTIONS, HOOK_OPTIONS_BY_AWARENESS, AWARENESS_LEVEL_OPTIONS, LANGUAGE_TYPE_OPTIONS, GENDER_OPTIONS, AGE_OPTIONS, CTA_OPTIONS } from '../constants';
 import { SparklesIcon } from './icons/SparklesIcon';
 
 interface CreativeGeneratorFormProps {
@@ -8,20 +9,24 @@ interface CreativeGeneratorFormProps {
   setSelectedNiche: (niche: string) => void;
   customNiche: string;
   setCustomNiche: (niche: string) => void;
+  targetGender: TargetGender;
+  setTargetGender: (gender: TargetGender) => void;
+  targetAge: string;
+  setTargetAge: (age: string) => void;
   awarenessLevel: AwarenessLevel;
   setAwarenessLevel: (level: AwarenessLevel) => void;
   languageType: LanguageType;
   setLanguageType: (type: LanguageType) => void;
   productDetails: string;
   setProductDetails: (details: string) => void;
-  targetGender: string;
-  setTargetGender: (gender: string) => void;
-  targetAge: string;
-  setTargetAge: (age: string) => void;
   selectedHook: string;
   setSelectedHook: (hook: string) => void;
   creativeType: CreativeType;
   setCreativeType: (type: CreativeType) => void;
+  selectedCTA: string;
+  setSelectedCTA: (cta: string) => void;
+  customCTA: string;
+  setCustomCTA: (cta: string) => void;
   isLoading: boolean;
   onGenerate: () => void;
   productDetailsHistory: string[];
@@ -45,20 +50,24 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
   setSelectedNiche,
   customNiche,
   setCustomNiche,
+  targetGender,
+  setTargetGender,
+  targetAge,
+  setTargetAge,
   awarenessLevel,
   setAwarenessLevel,
   languageType,
   setLanguageType,
   productDetails,
   setProductDetails,
-  targetGender,
-  setTargetGender,
-  targetAge,
-  setTargetAge,
   selectedHook,
   setSelectedHook,
   creativeType,
   setCreativeType,
+  selectedCTA,
+  setSelectedCTA,
+  customCTA,
+  setCustomCTA,
   isLoading,
   onGenerate,
   productDetailsHistory,
@@ -89,61 +98,68 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
       <h2 className="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-indigo-400">Defina seu Criativo</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         
-        <FormSection number={1} title="Nicho de Mercado">
-          <select
-            id="niche"
-            value={selectedNiche}
-            onChange={(e) => setSelectedNiche(e.target.value)}
-            className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
-          >
-            {NICHE_OPTIONS.map((niche) => (
-              <option key={niche} value={niche} className="bg-gray-800">
-                {niche}
-              </option>
-            ))}
-          </select>
+        <FormSection number={1} title="Nicho e Público Alvo">
+            <div className="space-y-4">
+                <div>
+                    <label htmlFor="niche" className="block text-xs font-medium text-gray-400 mb-1">Nicho de Mercado</label>
+                    <select
+                        id="niche"
+                        value={selectedNiche}
+                        onChange={(e) => setSelectedNiche(e.target.value)}
+                        className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
+                    >
+                        {NICHE_OPTIONS.map((niche) => (
+                        <option key={niche} value={niche} className="bg-gray-800">
+                            {niche}
+                        </option>
+                        ))}
+                    </select>
+                </div>
 
-          {selectedNiche === 'Outro' && (
-            <input
-              type="text"
-              id="customNiche"
-              value={customNiche}
-              onChange={(e) => setCustomNiche(e.target.value)}
-              placeholder="Ex: Criptomoedas para iniciantes"
-              className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
-              required
-            />
-          )}
-        </FormSection>
-
-        <FormSection number={2} title="Público-Alvo">
-            <div>
-                <label htmlFor="targetGender" className="block text-sm font-medium text-gray-300 mb-2">Gênero</label>
-                <select
-                    id="targetGender"
-                    value={targetGender}
-                    onChange={(e) => setTargetGender(e.target.value)}
-                    className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
-                >
-                    <option value="Ambos" className="bg-gray-800">Ambos</option>
-                    <option value="Homem" className="bg-gray-800">Homem</option>
-                    <option value="Mulher" className="bg-gray-800">Mulher</option>
-                </select>
-            </div>
-            <div>
-                <label htmlFor="targetAge" className="block text-sm font-medium text-gray-300 mb-2">Idade</label>
-                <input
+                {selectedNiche === 'Outro' && (
+                    <input
                     type="text"
-                    id="targetAge"
-                    value={targetAge}
-                    onChange={(e) => setTargetAge(e.target.value)}
-                    placeholder="Ex: 25-34"
+                    id="customNiche"
+                    value={customNiche}
+                    onChange={(e) => setCustomNiche(e.target.value)}
+                    placeholder="Ex: Criptomoedas para iniciantes"
                     className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
-                />
+                    required
+                    />
+                )}
+
+                <div className="grid grid-cols-2 gap-3">
+                    <div>
+                        <label htmlFor="gender" className="block text-xs font-medium text-gray-400 mb-1">Gênero</label>
+                        <select
+                            id="gender"
+                            value={targetGender}
+                            onChange={(e) => setTargetGender(e.target.value as TargetGender)}
+                            className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:ring-2 focus:ring-sky-500 outline-none transition"
+                        >
+                            {GENDER_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value} className="bg-gray-800">{opt.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                     <div>
+                        <label htmlFor="age" className="block text-xs font-medium text-gray-400 mb-1">Faixa Etária</label>
+                        <select
+                            id="age"
+                            value={targetAge}
+                            onChange={(e) => setTargetAge(e.target.value)}
+                            className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:ring-2 focus:ring-sky-500 outline-none transition"
+                        >
+                             {AGE_OPTIONS.map((opt) => (
+                                <option key={opt} value={opt} className="bg-gray-800">{opt}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
             </div>
         </FormSection>
 
-        <FormSection number={3} title="Nível de Consciência">
+        <FormSection number={2} title="Nível de Consciência">
             <select
                 id="awarenessLevel"
                 value={awarenessLevel}
@@ -163,7 +179,7 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
             )}
         </FormSection>
 
-        <FormSection number={4} title="Tipo de Linguagem">
+        <FormSection number={3} title="Tipo de Linguagem">
             <select
                 id="languageType"
                 value={languageType}
@@ -183,7 +199,7 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
             )}
         </FormSection>
 
-        <FormSection number={5} title="Detalhes do Produto/Oferta">
+        <FormSection number={4} title="Detalhes do Produto/Oferta">
             <textarea
                 id="productDetails"
                 value={productDetails}
@@ -212,7 +228,7 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
             )}
         </FormSection>
         
-        <FormSection number={6} title="Estrutura do Criativo / Gancho">
+        <FormSection number={5} title="Estrutura do Criativo / Gancho">
           <select
             id="hook"
             value={selectedHook}
@@ -227,21 +243,56 @@ export const CreativeGeneratorForm: React.FC<CreativeGeneratorFormProps> = ({
           </select>
         </FormSection>
         
-        <FormSection number={7} title="Formato do Criativo">
-          <select
-            id="creativeType"
-            value={creativeType}
-            onChange={(e) => setCreativeType(e.target.value as CreativeType)}
-            className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
-          >
-            {CREATIVE_TYPE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value} className="bg-gray-800">
-                {option.label}
-              </option>
-            ))}
-          </select>
+        <FormSection number={6} title="Formato do Criativo">
+            <div className="grid grid-cols-1 gap-4">
+                <select
+                id="creativeType"
+                value={creativeType}
+                onChange={(e) => setCreativeType(e.target.value as CreativeType)}
+                className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
+                >
+                {CREATIVE_TYPE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value} className="bg-gray-800">
+                    {option.label}
+                    </option>
+                ))}
+                </select>
+            </div>
         </FormSection>
 
+        <FormSection number={7} title="Chamada para Ação (CTA)">
+            <div className="space-y-4">
+                 <div>
+                    <label htmlFor="cta" className="block text-xs font-medium text-gray-400 mb-1">Escolha a CTA</label>
+                    <select
+                        id="cta"
+                        value={selectedCTA}
+                        onChange={(e) => setSelectedCTA(e.target.value)}
+                        className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
+                    >
+                        {CTA_OPTIONS.map((cta) => (
+                        <option key={cta} value={cta} className="bg-gray-800">
+                            {cta}
+                        </option>
+                        ))}
+                    </select>
+                </div>
+                {selectedCTA === 'Outro (Personalizado)' && (
+                    <div>
+                        <label htmlFor="customCTA" className="block text-xs font-medium text-gray-400 mb-1">Sua CTA Personalizada</label>
+                        <input
+                        type="text"
+                        id="customCTA"
+                        value={customCTA}
+                        onChange={(e) => setCustomCTA(e.target.value)}
+                        placeholder="Ex: Clique para falar no WhatsApp agora!"
+                        className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"
+                        required
+                        />
+                    </div>
+                )}
+            </div>
+        </FormSection>
 
         <button
           type="submit"

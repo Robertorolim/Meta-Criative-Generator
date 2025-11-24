@@ -1,24 +1,29 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { CreativeGeneratorForm } from './components/CreativeGeneratorForm';
 import { CreativeDisplay } from './components/CreativeDisplay';
 import { Header } from './components/Header';
-import { CreativeType, GeneratedContent, VoiceStyle, VoiceOption, AwarenessLevel, LanguageType } from './types';
-import { generateCreative, generateAudio, generateCreativeVariation, generateReferenceImage } from './services/geminiService';
-import { NICHE_OPTIONS, HOOK_OPTIONS_BY_AWARENESS, AWARENESS_LEVEL_OPTIONS, LANGUAGE_TYPE_OPTIONS } from './constants';
+import { CreativeType, GeneratedContent, VoiceStyle, VoiceOption, AwarenessLevel, LanguageType, TargetGender } from './types';
+import { generateCreative, generateAudio, generateCreativeVariation } from './services/geminiService';
+import { NICHE_OPTIONS, HOOK_OPTIONS_BY_AWARENESS, AWARENESS_LEVEL_OPTIONS, LANGUAGE_TYPE_OPTIONS, AGE_OPTIONS, CTA_OPTIONS } from './constants';
 
 const App: React.FC = () => {
   const [selectedNiche, setSelectedNiche] = useState<string>(NICHE_OPTIONS[0]);
   const [customNiche, setCustomNiche] = useState<string>('');
+  const [targetGender, setTargetGender] = useState<TargetGender>(TargetGender.BOTH);
+  const [targetAge, setTargetAge] = useState<string>(AGE_OPTIONS[1]); // Default to 25-34
+  
   const [awarenessLevel, setAwarenessLevel] = useState<AwarenessLevel>(AWARENESS_LEVEL_OPTIONS[0].value);
   const [languageType, setLanguageType] = useState<LanguageType>(LANGUAGE_TYPE_OPTIONS[0].value);
   const [productDetails, setProductDetails] = useState<string>('');
-  const [targetGender, setTargetGender] = useState<string>('Ambos');
-  const [targetAge, setTargetAge] = useState<string>('');
   
   const initialHook = HOOK_OPTIONS_BY_AWARENESS[awarenessLevel]?.[0]?.value || '';
   const [selectedHook, setSelectedHook] = useState<string>(initialHook);
   
   const [creativeType, setCreativeType] = useState<CreativeType>(CreativeType.VIDEO_UGC);
+  
+  const [selectedCTA, setSelectedCTA] = useState<string>(CTA_OPTIONS[0]);
+  const [customCTA, setCustomCTA] = useState<string>('');
 
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -28,10 +33,6 @@ const App: React.FC = () => {
   const [isAudioLoading, setIsAudioLoading] = useState<boolean>(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [audioError, setAudioError] = useState<string | null>(null);
-
-  // Image Generation State
-  const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
-  const [imageError, setImageError] = useState<string | null>(null);
 
   const [productDetailsHistory, setProductDetailsHistory] = useState<string[]>([]);
   const MAX_HISTORY_SIZE = 5;
@@ -49,6 +50,7 @@ const App: React.FC = () => {
 
   const addProductToHistory = (details: string) => {
     if (!details.trim()) return;
+
     setProductDetailsHistory(prevHistory => {
       const filteredHistory = prevHistory.filter(item => item !== details);
       const newHistory = [details, ...filteredHistory].slice(0, MAX_HISTORY_SIZE);
@@ -63,6 +65,9 @@ const App: React.FC = () => {
 
   const handleGenerate = useCallback(async () => {
     const niche = selectedNiche === 'Outro' ? customNiche : selectedNiche;
+    const cta = selectedCTA === 'Outro (Personalizado)' ? customNiche : selectedCTA; // Note: Using customNiche variable logic for customCTA below
+    const finalCTA = selectedCTA === 'Outro (Personalizado)' ? customCTA : selectedCTA;
+
     if (!niche) {
       setError('Por favor, defina um nicho para gerar o criativo.');
       return;
@@ -77,18 +82,18 @@ const App: React.FC = () => {
     setGeneratedContent(null);
     setAudioUrl(null);
     setAudioError(null);
-    setImageError(null);
 
     try {
       const content = await generateCreative(
         niche,
+        targetGender,
+        targetAge,
         awarenessLevel,
         creativeType, 
         productDetails, 
         selectedHook,
         languageType,
-        targetGender,
-        targetAge,
+        finalCTA
       );
       setGeneratedContent(content);
     } catch (e: any) {
@@ -97,41 +102,40 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedNiche, customNiche, productDetails, selectedHook, creativeType, awarenessLevel, languageType, targetGender, targetAge]);
+  }, [selectedNiche, customNiche, targetGender, targetAge, productDetails, selectedHook, creativeType, awarenessLevel, languageType, selectedCTA, customCTA]);
 
-  const handleGenerateVariation = useCallback(async (customCTA?: string) => {
+  const handleGenerateVariation = useCallback(async (originalText: string) => {
     const niche = selectedNiche === 'Outro' ? customNiche : selectedNiche;
+    const finalCTA = selectedCTA === 'Outro (Personalizado)' ? customCTA : selectedCTA;
+
     setIsVariationLoading(true);
     setError(null);
-    setAudioUrl(null); 
+    setAudioUrl(null); // Clear previous audio
     setAudioError(null);
-    setImageError(null);
-    
-    if (generatedContent) {
-         setGeneratedContent(prev => prev ? { ...prev, imageUrl: undefined } : null);
-    }
-
     try {
-      const content = await generateCreativeVariation(
-          niche, 
-          awarenessLevel, 
-          creativeType, 
-          productDetails, 
-          selectedHook, 
-          languageType, 
-          targetGender, 
-          targetAge, 
-          "original", // Placeholder for legacy prop
-          customCTA
+      const newText = await generateCreativeVariation(
+        niche, 
+        targetGender, 
+        targetAge, 
+        awarenessLevel, 
+        creativeType, 
+        productDetails, 
+        selectedHook, 
+        languageType, 
+        originalText,
+        finalCTA
       );
-      setGeneratedContent(content);
+      setGeneratedContent(prevContent => ({
+        ...prevContent!,
+        text: newText,
+      }));
     } catch (e: any) {
       console.error(e);
       setError(e.message ||'Ocorreu um erro ao gerar a variação. Tente novamente.');
     } finally {
       setIsVariationLoading(false);
     }
-  }, [selectedNiche, customNiche, productDetails, selectedHook, creativeType, awarenessLevel, languageType, targetGender, targetAge, generatedContent]);
+  }, [selectedNiche, customNiche, targetGender, targetAge, productDetails, selectedHook, creativeType, awarenessLevel, languageType, selectedCTA, customCTA]);
 
   const handleGenerateAudio = useCallback(async (text: string, voiceName: string, voiceStyle: VoiceStyle, styleHint?: VoiceOption['styleHint']) => {
     setIsAudioLoading(true);
@@ -148,20 +152,6 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const handleGenerateImage = useCallback(async (prompt: string) => {
-    setIsImageLoading(true);
-    setImageError(null);
-    try {
-        const imageUrl = await generateReferenceImage(prompt);
-        setGeneratedContent(prev => prev ? { ...prev, imageUrl } : null);
-    } catch (e: any) {
-        console.error(e);
-        setImageError("Falha ao gerar imagem. Tente novamente.");
-    } finally {
-        setIsImageLoading(false);
-    }
-  }, []);
-
   return (
     <div className="min-h-screen bg-gray-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]">
       <Header />
@@ -172,20 +162,24 @@ const App: React.FC = () => {
             setSelectedNiche={setSelectedNiche}
             customNiche={customNiche}
             setCustomNiche={setCustomNiche}
+            targetGender={targetGender}
+            setTargetGender={setTargetGender}
+            targetAge={targetAge}
+            setTargetAge={setTargetAge}
             awarenessLevel={awarenessLevel}
             setAwarenessLevel={setAwarenessLevel}
             languageType={languageType}
             setLanguageType={setLanguageType}
             productDetails={productDetails}
             setProductDetails={setProductDetails}
-            targetGender={targetGender}
-            setTargetGender={setTargetGender}
-            targetAge={targetAge}
-            setTargetAge={setTargetAge}
             selectedHook={selectedHook}
             setSelectedHook={setSelectedHook}
             creativeType={creativeType}
             setCreativeType={setCreativeType}
+            selectedCTA={selectedCTA}
+            setSelectedCTA={setSelectedCTA}
+            customCTA={customCTA}
+            setCustomCTA={setCustomCTA}
             isLoading={isLoading}
             onGenerate={handleGenerate}
             productDetailsHistory={productDetailsHistory}
@@ -202,9 +196,6 @@ const App: React.FC = () => {
             audioError={audioError}
             onGenerateVariation={handleGenerateVariation}
             isVariationLoading={isVariationLoading}
-            onGenerateImage={handleGenerateImage}
-            isImageLoading={isImageLoading}
-            imageError={imageError}
           />
         </div>
       </main>
